@@ -1,0 +1,28 @@
+spring.application.name=codespark
+
+#mysql 설정
+spring.datasource.driver-class-name = com.mysql.cj.jdbc.Driver
+#spring.datasource.url
+#spring.datasource.username�
+#spring.datasource.password�
+
+spring.jpa.show-sql=true
+spring.jpa.hibernate.use-new-id-generator-mappings=false
+spring.jpa.hibernate.ddl-auto=update
+
+spring.datasource.hikari.auto-commit=true
+# 커넥션을 읽기 전용으로 할지 말지 결정
+spring.datasource.hikari.read-only=false
+# 커넥션 풀에서 커넥션을 얻어올 때까지 대기 최대 시간
+spring.datasource.hikari.connection-timeout=3000
+# 풀에서 유지할 최소 유휴 커넥션 수
+spring.datasource.hikari.minimum-idle=5
+# 커넥션 최대  생존 시간
+spring.datasource.hikari.max-lifetime=240000
+# 커네션 풀 최대 크기
+spring.datasource.hikari.max-pool-size=20
+
+#message
+spring.messages.basename=messages
+spring.messages.encoding=UTF-8
+####
