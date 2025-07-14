@@ -1,0 +1,12 @@
+package com.spark.Entity;
+
+import jakarta.persistence.Entity;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+public class MeterialEntity {
+
+}
