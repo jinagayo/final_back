@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.BoardDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class BoardEntity {
+	@Id
 	private int board_id; //게시판id(글번호)
 	private String title;//제목
 	private String boardnum; //게시판번호

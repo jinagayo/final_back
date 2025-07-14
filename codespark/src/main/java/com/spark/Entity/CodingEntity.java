@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.CodingDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CodingEntity {
+	@Id
 	private int code_id;//코딩문제id
 	private String qeustion;//문제
 	private String type;//문제종류

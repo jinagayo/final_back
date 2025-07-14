@@ -5,6 +5,7 @@ import java.util.Date;
 import com.spark.dto.UserDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class UserEntity {
+	@Id
 	private String user_id;//아이디
 	private String pw;//비밀번호
 	private String name;//이름

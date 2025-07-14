@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.CommonDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CommonEntity {
+	@Id
 	private String com_id;//공통테이블id
 	private String name;//코드명
 	private int number;//순서
