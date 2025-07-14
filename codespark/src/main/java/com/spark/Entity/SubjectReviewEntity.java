@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.SubjectReviewDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class SubjectReviewEntity {
+	@Id
 	private int reviewnum;//리뷰번호
 	private String class_id;//강의 코드
 	private String content;//한줄평

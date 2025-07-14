@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.AttendanceDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class AttendanceEntity {
+	@Id
 	private int att_id;//수강정보id
 	private String class_id;//강의 코드
 	private String stu_id;//학생 아이디

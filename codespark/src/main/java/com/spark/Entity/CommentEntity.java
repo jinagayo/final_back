@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.CommentDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class CommentEntity {
+	@Id
 	private int comment_id;//댓글 아이디
 	private int boardno; //게시글번호
 	private int reno; //부모댓글

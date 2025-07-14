@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.ClassDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class ClassEntity {
+	@Id
 	private String class_id;//강의코드
 	private String name;//강의명
 	private String detail;//강의설명
