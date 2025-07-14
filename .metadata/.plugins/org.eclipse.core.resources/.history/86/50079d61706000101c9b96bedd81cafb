@@ -1,0 +1,21 @@
+package com.spark.dto;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+//강의목록
+public class ClassDTO {
+	@Id
+	private String class_id;//강의코드
+	private String name;//강의명
+	private String detail;//강의설명
+	private int price;//가격
+	private String intro;//짧읜 강의 소개(배너)
+	private double mark;//평점
+	private String teach_id;//강사아이디
+	private String sub_id;//과목 코드
+	private String img;//대표이미지
+}

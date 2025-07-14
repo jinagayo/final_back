@@ -1,0 +1,16 @@
+package com.spark.dto;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+//테스트풀이
+public class TestSubDTO {
+	@Id
+	private int testsub_id;//테스트풀이id
+	private int testnum;//문제번호
+	private String submit;//제출한답
+	private boolean correct;//정답여부
+}
