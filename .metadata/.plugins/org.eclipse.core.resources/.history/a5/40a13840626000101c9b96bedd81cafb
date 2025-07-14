@@ -1,0 +1,16 @@
+package com.spark.dto;
+
+import jakarta.persistence.Entity;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+public class CommentDTO {
+	private int comment_id;//댓글 아이디
+	private int boardno; //게시글번호
+	private int reno; //부모댓글
+	private int step; //순서
+	private String content; //내용
+}
