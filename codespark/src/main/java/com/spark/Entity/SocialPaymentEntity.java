@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.SocialPaymentDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class SocialPaymentEntity {
+	@Id
 	private int payment_id;//결제번호
 	private int attendance_id;//수강정보pk
 	private String payment_type;//결제종류

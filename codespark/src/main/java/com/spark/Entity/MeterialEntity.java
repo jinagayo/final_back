@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.MeterialDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class MeterialEntity {
+	@Id
 	private int meter_id;//강의자료id
 	private String class_id;//강의 코드
 	private int seq;//순서
