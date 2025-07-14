@@ -1,0 +1,15 @@
+package com.spark.dto;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
+@Data
+public class SubjectReviewDTO {
+	private int reviewnum;//리뷰번호
+	private String class_id;//강의 코드
+	private String content;//한줄평
+	private int rating;//별점
+}
