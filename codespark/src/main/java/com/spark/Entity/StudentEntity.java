@@ -4,6 +4,7 @@ import com.spark.dto.SocialPaymentDTO;
 import com.spark.dto.StudentDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class StudentEntity {
+	@Id
 	private String stud_id;//아이디
 	private String degree;//학력
 	private String award;//수상이력

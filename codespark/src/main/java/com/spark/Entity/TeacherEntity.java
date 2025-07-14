@@ -3,6 +3,7 @@ package com.spark.Entity;
 import com.spark.dto.TeacherDTO;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class TeacherEntity {
+	@Id
 	private String teach_id; // 강사id
 	private String sub_id; //과목코드
 	private String career; // 경력사항
