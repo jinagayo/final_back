@@ -1,0 +1,16 @@
+package com.spark.service;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import com.spark.dto.UserDTO;
+
+@Service
+public class AuthService {
+
+	public ResponseEntity<?> authenticateUser(UserDTO login) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}

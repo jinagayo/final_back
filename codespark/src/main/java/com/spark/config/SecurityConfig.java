@@ -44,7 +44,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
             .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (REST API용)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()    // 회원가입, 로그인 API 허용
+                .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
                 .anyRequest().authenticated()                   // 나머지는 인증 필요

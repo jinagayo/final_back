@@ -1,0 +1,45 @@
+package com.spark.controller;
+
+import java.util.HashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.spark.dto.UserDTO;
+import com.spark.service.AuthService;
+
+//login,logout 관련 컨트롤러
+@RestController
+@RequestMapping("/auth")
+@CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
+public class AuthController {
+	@Autowired
+	private AuthService authService;
+	
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody UserDTO login) {
+        try {
+            System.out.println("=== 로그인 요청 ===");
+            System.out.println("아이디: " + login.getUser_id());
+            System.out.println("비밀번호: " + (login.getPw() != null ? "***있음***" : "NULL"));
+            
+            // 로그인 처리
+            ResponseEntity<?> loginResult = authService.authenticateUser(loginRequest);
+            
+            return loginResult;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> response = new HashMap()<>();
+            response.put("success", false);
+            response.put("message", "로그인 처리 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+	
+}

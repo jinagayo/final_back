@@ -1,0 +1,45 @@
+package com.spark.service;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.spark.dto.UserDTO;
+import com.spark.repository.AuthRepository;
+
+@Service
+public class AuthService {
+
+	@Autowired
+	private AuthRepository AuthRepo;
+	
+	@Autowired
+	private PasswordEncoder pwEncoder;
+	public ResponseEntity<?> authenticateUser(UserDTO login) {
+		try {
+			//아이디 검증
+			if(login.getUser_id() == null || login.getUser_id().trim().isEmpty()) {
+				Map<String, Object> response = new HashMap<>();
+				response.put("success", false);
+				response.put("message", "아이디를 입력하세요");
+				return ResponseEntity.badRequest().body(response);
+			}
+			//비밀번호 검증
+			if(login.getPw() == null || login.getPw().trim().isEmpty()) {
+				Map<String, Object> response = new HashMap<>();
+				response.put("success", false);
+				response.put("message", "비밀번호를 입력하세요");
+				return ResponseEntity.badRequest().body(response);
+			}
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+}
