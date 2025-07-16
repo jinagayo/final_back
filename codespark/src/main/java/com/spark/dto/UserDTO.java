@@ -1,43 +1,62 @@
 package com.spark.dto;
 
 import java.util.Date;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Data
-//사용자
 public class UserDTO {
-	@NotBlank(message="아이디를 입력하세요.")
-	private String user_id;//아이디
-	
-	@NotBlank(message="비밀번호를 입력하세요.")
-	@Size(min=5,message = "비밀번호는 5자 이상이어야 합니다.")
-	private String pw;//비밀번호
-	
-	@NotBlank(message="이름을 입력하세요")
-	private String name;//이름
-	
-	
-	private String address1;//기본주소
-	private String address2;//상세주소
-	private String addrssnum;//우편번호
-	
-	@NotBlank(message="생년월일을 입력하세요.")
-	private Date birthday;//생년월일
-	
-	@NotBlank(message="전화번호를 입력하세요.")
-	private String phone;//전화번호
-	private String position;//권한
-	
-	@NotBlank(message="이메일을 입력하세요.")
-	@Email(message="이메일 형식이 올바르지 않습니다.")
-	private String email;//이메일
-	private String img;//사진
+    
+    @NotBlank(message = "아이디를 입력하세요.")
+    @Size(min = 4, max = 20, message = "아이디는 4-20자 사이여야 합니다.")
+    private String user_id;
+    
+    @NotBlank(message = "비밀번호를 입력하세요.")
+    @Size(min = 8, message = "비밀번호는 8자 이상이어야 합니다.")
+    private String pw; 
+    
+    private String confirmPassword;
+    
+    @NotBlank(message = "이름을 입력하세요.")
+    private String name;
+    
+    @NotBlank(message = "기본주소를 입력하세요.")
+    private String address1;
+    
+    private String address2;
+    
+    @NotBlank(message = "우편번호를 입력하세요.")
+    private String addressnum;
+    
+    @NotNull(message = "생년월일을 입력하세요.")
+    private Date birthday;
+    
+    @NotBlank(message = "전화번호를 입력하세요.")
+    @Pattern(regexp = "^010-\\d{4}-\\d{4}$", message = "전화번호 형식이 올바르지 않습니다.")
+    private String phone;
+    
+    private String position;
+    
+    @NotBlank(message = "이메일을 입력하세요.")
+    @Email(message = "이메일 형식이 올바르지 않습니다.")
+    private String email;
+    
+    private String img;
+    
+    //비밀번호 확인 검증 메서드
+    public boolean isPasswordMatching() {
+        if (pw == null || confirmPassword == null) {
+            return false;
+        }
+        return pw.equals(confirmPassword);
+    }
+    
+    //비밀번호 유효성 검사
+    public boolean isPasswordValid() {
+        return pw != null && pw.length() >= 8;
+    }
 }

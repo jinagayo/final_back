@@ -1,0 +1,32 @@
+package com.spark.Entity;
+
+import com.spark.dto.TeacherDTO;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@Table(name = "teacher")
+@NoArgsConstructor
+public class TeacherEntity {
+	@Id
+	@Column(name = "teach_id")
+	private String teachId; // 강사id
+	
+	@Column(name = "sub_id")
+	private String subId; //과목코드
+	private String career; // 경력사항
+	private String introduce; // 자기소개
+	
+	public TeacherEntity(TeacherDTO dto) {
+		this.teach_id = dto.getTeach_id();
+		this.sub_id = dto.getSub_id();
+		this.career = dto.getCareer();
+		this.introduce = dto.getIntroduce();
+	}
+}

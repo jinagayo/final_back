@@ -1,0 +1,20 @@
+package com.spark.repository;
+
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.spark.Entity.UserEntity;
+import com.spark.dto.UserDTO;
+
+@Repository
+public interface UserRepository extends JpaRepository<UserEntity, String> {
+
+	boolean existsByEmail(String email);
+
+	boolean existsByUserId(String user_id);
+
+	Optional<UserEntity> findByUser_id(String user_id);
+
+}

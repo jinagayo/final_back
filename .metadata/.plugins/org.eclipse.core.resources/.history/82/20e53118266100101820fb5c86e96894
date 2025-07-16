@@ -1,0 +1,67 @@
+package com.spark.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.spark.Entity.UserEntity;
+import com.spark.dto.UserDTO;
+import com.spark.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+
+@Service
+@Transactional
+public class UserService {
+	@Autowired
+	private UserRepository userRepo;
+	
+	@Autowired
+	private PasswordEncoder pwencoder;
+	
+	// 학생 회원가입
+    public ResponseEntity<?> createStudent(UserDTO request) {
+        try {
+            if (userRepo.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest().body("이미 존재하는 이메일입니다");
+            }
+            
+            UserEntity student = new UserEntity();
+            student.setName(request.getName());
+            student.setEmail(request.getEmail());
+            student.setPassword(pwencoder.encode(request.getPassword()));
+            student.setPhone(request.getPhone());
+            student.setRole(UserRole.STUDENT);  // 고정값
+            
+            userRepo.save(student);
+            return ResponseEntity.ok("학생 회원가입 완료");
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("회원가입 실패");
+        }
+    }
+    
+    // 강사 회원가입 (추가 필드 가능)
+    public ResponseEntity<?> createInstructor(InstructorSignupRequest request) {
+        try {
+            if (userRepo.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest().body("이미 존재하는 이메일입니다");
+            }
+            
+            UserEntity instructor = new UserEntity();
+            instructor.setName(request.getName());
+            instructor.setEmail(request.getEmail());
+            instructor.setPassword(passwordEncoder.encode(request.getPassword()));
+            instructor.setPhone(request.getPhone());
+            instructor.setRole(UserRole.INSTRUCTOR);  // 고정값
+            // instructor.setExperience(request.getExperience()); // 강사만의 추가 필드
+            
+            userRepo.save(instructor);
+            return ResponseEntity.ok("강사 회원가입 완료");
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("회원가입 실패");
+        }
+    }
+}

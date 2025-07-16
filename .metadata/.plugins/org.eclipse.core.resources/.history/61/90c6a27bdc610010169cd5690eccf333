@@ -1,0 +1,49 @@
+package com.spark.Entity;
+
+import com.spark.dto.SocialPaymentDTO;
+import com.spark.dto.StudentDTO;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@Table(name = "student")
+@NoArgsConstructor
+public class StudentEntity {
+	@Id
+	@Column(name = "stud_id")
+	private String studId;//아이디
+	
+	@Column(name = "degree")
+	private String degree;//학력
+	
+	@Column(name = "award")
+	private String award;//수상이력
+	
+	@Column(name = "skill")
+	private String skill;//기술스택
+	
+	@Column(name = "license")
+	private String license;//자격증
+	
+	@Column(name = "lauguage")
+	private String lauguage; // 어학사전
+	
+	@Column(name = "advice")
+	private String advice; // 취업상담
+	
+	public StudentEntity(StudentDTO dto) {
+		this.stud_id = dto.getStud_id();
+		this.degree = dto.getDegree();
+		this.award = dto.getAward();
+		this.skill = dto.getSkill();
+		this.license = dto.getLicense();
+		this.lauguage = dto.getLauguage();
+		this.advice = dto.getAdvice();
+	}
+}

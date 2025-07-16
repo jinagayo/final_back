@@ -1,0 +1,52 @@
+package com.spark.Entity;
+
+import com.spark.dto.ClassDTO;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@Table(name = "class")
+@NoArgsConstructor
+public class ClassEntity {
+	@Id
+	@Column(name = "class_id")
+	private String classId;//강의코드
+	
+	@Column(name = "name")
+	private String name;//강의명
+	
+	@Column(name = "detail")
+	private String detail;//강의설명
+	
+	@Column(name = "price")
+	private int price;//가격
+	
+	@Column(name = "intro")
+	private String intro;//짧읜 강의 소개(배너)
+	
+	@Column(name = "mark")
+	private double mark;//평점
+	
+	@Column(name = "teach_id")
+	private String teachId;//강사아이디
+	private String sub_id;//과목 코드
+	private String img;//대표이미지
+	
+	public ClassEntity(ClassDTO dto) {
+		this.class_id = dto.getClass_id();
+		this.name = dto.getName();
+		this.detail = dto.getDetail();
+		this.price = dto.getPrice();
+		this.intro = dto.getIntro();
+		this.mark = dto.getMark();
+		this.teach_id = dto.getTeach_id();
+		this.sub_id = dto.getSub_id();
+		this.img = dto.getImg();
+	}
+}

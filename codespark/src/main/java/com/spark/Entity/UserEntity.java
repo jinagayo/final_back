@@ -21,43 +21,50 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)  // JPA 레벨 설정
-	private String user_id;//아이디
+	@Column(name = "user_id")
+	private String userId;//아이디
 	
-	@Column(nullable = false)
+	@Column(nullable = false,name="pw")
 	private String pw;//비밀번호
 	
-	@Column(nullable = false)
+	@Column(nullable = false,name="name")
 	private String name;//이름
 	
-	@Column(nullable = true)
+	@Column(nullable = true,name="address1")
 	private String address1;//기본주소
-	@Column(nullable = true)
+	
+	@Column(nullable = true,name="address2")
 	private String address2;//상세주소
-	@Column(nullable = true)
-	private String addrssnum;//우편번호
-	@Column(nullable = false)
+	
+	@Column(nullable = true,name="addressnum")
+	private String addressnum;//우편번호
+	
+	@Column(nullable = false,name="birthday")
 	private Date birthday;//생년월일
-	@Column(nullable = true,unique = true)
+	
+	@Column(nullable = true,unique = true,name="phone")
 	private String phone;//전화번호
 	
+	@Column(name = "position")
 	private String position;//권한
 	
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false, unique = true,name="email")
 	private String email;//이메일
-	@Column(nullable = true)
+	@Column(nullable = true,name="img")
 	private String img;//사진
 	
 	public UserEntity(UserDTO dto) {
-		this.user_id = dto.getUser_id();
+		this.userId = dto.getUser_id();
 		this.pw = dto.getPw();
 		this.name = dto.getName();
 		this.address1 = dto.getAddress1();
 		this.address2 = dto.getAddress2();
+		this.addressnum = dto.getAddressnum();
 		this.birthday = dto.getBirthday();
 		this.phone = dto.getPhone();
 		this.position = dto.getPosition();
 		this.email = dto.getEmail();
 		this.img = dto.getImg();
 	}
+
 }

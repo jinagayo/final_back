@@ -1,0 +1,278 @@
+package com.spark.service;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import com.spark.Entity.UserEntity;
+import com.spark.dto.UserDTO;
+import com.spark.repository.UserRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+
+@Service
+@Transactional
+public class UserService {
+    @Autowired
+    private UserRepository userRepo;
+    
+    @Autowired
+    private PasswordEncoder pwencoder;
+    
+    // ✅ EntityManager 추가 - 직접 persist 사용
+    @PersistenceContext
+    private EntityManager entityManager;
+    
+    // 학생 회원가입
+    public ResponseEntity<?> createStudent(UserDTO request) {
+        try {
+            System.out.println("=== 학생 회원가입 시작 ===");
+            System.out.println("받은 데이터 확인:");
+            System.out.println("아이디: " + request.getUser_id());
+            System.out.println("비밀번호: " + (request.getPw() != null ? "***있음***" : "NULL"));
+            System.out.println("이름: " + request.getName());
+            System.out.println("이메일: " + request.getEmail());
+            
+            // 🚨 중요: 비밀번호 검증
+            if (request.getPw() == null || request.getPw().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "비밀번호는 필수입니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (!request.isPasswordValid()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "비밀번호는 8자 이상이어야 합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (!request.isPasswordMatching()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "비밀번호가 일치하지 않습니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (request.getUser_id() == null || request.getUser_id().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "아이디는 필수입니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (request.getName() == null || request.getName().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "이름은 필수입니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "이메일은 필수입니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // ✅ 중복 검사를 한 번만 수행
+            Optional<UserEntity> existingUser = userRepo.findByUserId(request.getUser_id());
+            if (existingUser.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "이미 존재하는 아이디입니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (userRepo.existsByEmail(request.getEmail())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "이미 존재하는 이메일입니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // 비밀번호 암호화
+            System.out.println("비밀번호 암호화 시작...");
+            String encodedPassword = pwencoder.encode(request.getPw());
+            System.out.println("비밀번호 암호화 완료");
+            
+            // ✅ 새로운 Entity 생성 - merge 대신 persist 사용
+            UserEntity student = new UserEntity();
+            student.setUserId(request.getUser_id());
+            student.setPw(encodedPassword);
+            student.setName(request.getName());
+            student.setAddress1(request.getAddress1());
+            student.setAddress2(request.getAddress2());
+            student.setAddressnum(request.getAdressnum());
+            student.setBirthday(request.getBirthday());
+            student.setPhone(request.getPhone());
+            student.setEmail(request.getEmail());
+            student.setPosition("1");  // 학생
+            
+            System.out.println("Entity 생성 완료: " + student.getUserId());
+            
+            // 🎯 핵심: EntityManager.persist 사용 (merge 방지)
+            try {
+                entityManager.persist(student);
+                entityManager.flush(); // 즉시 DB에 반영
+                System.out.println("=== 학생 회원가입 완료 ===");
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "수강생 회원가입이 완료되었습니다!");
+                response.put("userId", student.getUserId());
+                response.put("userRole", "STUDENT");
+                
+                return ResponseEntity.ok(response);
+                
+            } catch (Exception persistException) {
+                System.err.println("저장 중 오류: " + persistException.getMessage());
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "아이디가 이미 존재하거나 저장 중 오류가 발생했습니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "서버 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+    
+    // 강사 회원가입
+    public ResponseEntity<?> createInstructor(UserDTO request) {
+        try {
+            System.out.println("=== 강사 회원가입 시작 ===");
+            System.out.println("받은 데이터 확인:");
+            System.out.println("아이디: " + request.getUser_id());
+            System.out.println("비밀번호: " + (request.getPw() != null ? "***있음***" : "NULL"));
+            
+            // 검증 로직들...
+            if (request.getPw() == null || request.getPw().trim().isEmpty()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "비밀번호는 필수입니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (!request.isPasswordValid()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "비밀번호는 8자 이상이어야 합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (!request.isPasswordMatching()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "비밀번호가 일치하지 않습니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // 중복 검사
+            Optional<UserEntity> existingUser = userRepo.findByUserId(request.getUser_id());
+            if (existingUser.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "이미 존재하는 아이디입니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            if (userRepo.existsByEmail(request.getEmail())) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "이미 존재하는 이메일입니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // 비밀번호 암호화
+            String encodedPassword = pwencoder.encode(request.getPw());
+            
+            UserEntity teacher = new UserEntity();
+            teacher.setUserId(request.getUser_id());
+            teacher.setPw(encodedPassword);
+            teacher.setName(request.getName());
+            teacher.setAddress1(request.getAddress1());
+            teacher.setAddress2(request.getAddress2());
+            teacher.setAddressnum(request.getAdressnum());
+            teacher.setBirthday(request.getBirthday());
+            teacher.setPhone(request.getPhone());
+            teacher.setEmail(request.getEmail());
+            teacher.setPosition("2");  // 강사
+            
+            // EntityManager.persist 사용
+            try {
+                entityManager.persist(teacher);
+                entityManager.flush();
+                System.out.println("=== 강사 회원가입 완료 ===");
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("message", "강사 회원가입이 완료되었습니다!");
+                response.put("userId", teacher.getUserId());
+                response.put("userRole", "INSTRUCTOR");
+                
+                return ResponseEntity.ok(response);
+                
+            } catch (Exception persistException) {
+                System.err.println("저장 중 오류: " + persistException.getMessage());
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "아이디가 이미 존재하거나 저장 중 오류가 발생했습니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "회원가입 실패: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+    
+    public ResponseEntity<?> checkUserIdAvailability(String userId) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Optional<UserEntity> existingUser = userRepo.findByUserId(userId);
+            boolean available = !existingUser.isPresent();
+            
+            response.put("available", available);
+            response.put("message", available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("available", false);
+            response.put("message", "아이디 확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+    
+    public ResponseEntity<?> checkEmailAvailability(String email) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            boolean available = !userRepo.existsByEmail(email);
+            
+            response.put("available", available);
+            response.put("message", available ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("available", false);
+            response.put("message", "이메일 확인 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+}

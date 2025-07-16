@@ -2,22 +2,34 @@ package com.spark.Entity;
 
 import com.spark.dto.MeterialSubDTO;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Table(name = "meterial_sub")
 @NoArgsConstructor
 public class MeterialSubEntity {
-	private int metersub_id;//자료수행id
-	private int meterial_id;//자료번호
+	@Id
+	@Column(name = "metersub_id")
+	private int metersubId;//자료수행id
+	
+	@Column(name = "meterial_id")
+	private int meterialId;//자료번호
+	
+	@Column(name = "content")
 	private String content;//과제물/메모
+	
+	@Column(name = "progress")
 	private int progress;//진행률
 	
 	public MeterialSubEntity(MeterialSubDTO dto) {
-		this.metersub_id = dto.getMetersub_id();
-		this.meterial_id = dto.getMeterial_id();
+		this.metersubId = dto.getMetersub_id();
+		this.meterialId = dto.getMeterial_id();
 		this.content = dto.getContent();
 		this.progress = dto.getProgress();
 	}

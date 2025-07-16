@@ -1,0 +1,100 @@
+package com.spark.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.spark.Entity.UserEntity;
+import com.spark.dto.UserDTO;
+import com.spark.repository.UserRepository;
+
+import jakarta.transaction.Transactional;
+
+@Service
+@Transactional
+public class UserService {
+	@Autowired
+	private UserRepository userRepo;
+	
+	@Autowired
+	private PasswordEncoder pwencoder;
+	
+	// 학생 회원가입
+    public ResponseEntity<?> createStudent(UserDTO request) {
+        try {
+            if (userRepo.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest().body("이미 존재하는 이메일입니다");
+            }
+            
+            UserEntity student = new UserEntity();
+            student.setUser_id(request.getUser_id());	//아이디
+            student.setPw(pwencoder.encode(request.getPw()));	//비밀번호
+            student.setName(request.getName());	//이름
+            student.setAddress1(request.getAddress1()); //기본주소
+            student.setAddress2(request.getAddress2()); //상세주소
+            student.setAddrssnum(request.getAddrssnum());  //우편번호
+            student.setBirthday(request.getBirthday()); 	//생년월일
+            student.setPhone(request.getPhone()); 	//전화번호
+            student.setEmail(request.getEmail());	//이메일
+            student.setPhone(request.getPhone());
+            student.setPosition("1");  // 고정값
+            
+            userRepo.save(student);
+            return ResponseEntity.ok("학생 회원가입 완료");
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("회원가입 실패");
+        }
+    }
+    
+    // 강사 회원가입 (추가 필드 가능)
+    public ResponseEntity<?> createInstructor(UserDTO request) {
+        try {
+            if (userRepo.existsByEmail(request.getEmail())) {
+                return ResponseEntity.badRequest().body("이미 존재하는 이메일입니다");
+            }
+            
+            UserEntity teacher = new UserEntity();
+            teacher.setUser_id(request.getUser_id());	//아이디
+            teacher.setPw(pwencoder.encode(request.getPw()));	//비밀번호
+            teacher.setName(request.getName());	//이름
+            teacher.setAddress1(request.getAddress1()); //기본주소
+            teacher.setAddress2(request.getAddress2()); //상세주소
+            teacher.setAddrssnum(request.getAddrssnum());  //우편번호
+            teacher.setBirthday(request.getBirthday()); 	//생년월일
+            teacher.setPhone(request.getPhone()); 	//전화번호
+            teacher.setEmail(request.getEmail());	//이메일
+            teacher.setPhone(request.getPhone());
+            teacher.setPosition("2");  // 고정값
+            
+            userRepo.save(teacher);
+            return ResponseEntity.ok("강사 회원가입 완료");
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("회원가입 실패");
+        }
+    }
+
+    // 아이디 중복 검사 API
+    public ResponseEntity<?> checkUserIdAvailability(String userId) {
+        Map<String, Object> response = new HashMap<>();
+        boolean available = !userRepository.existsByUserId(userId);
+        
+        response.put("available", available);
+        response.put("message", available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다.");
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // 이메일 중복 검사 API
+    public ResponseEntity<?> checkEmailAvailability(String email) {
+        Map<String, Object> response = new HashMap<>();
+        boolean available = !userRepository.existsByEmail(email);
+        
+        response.put("available", available);
+        response.put("message", available ? "사용 가능한 이메일입니다." : "이미 사용 중인 이메일입니다.");
+        
+        return ResponseEntity.ok(response);
+    }
+}

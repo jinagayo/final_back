@@ -2,22 +2,36 @@ package com.spark.Entity;
 
 import com.spark.dto.CommentDTO;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Table(name = "comment")
 @NoArgsConstructor
 public class CommentEntity {
-	private int comment_id;//댓글 아이디
+	@Id
+	@Column(name = "comment_id")
+	private int commentId;//댓글 아이디
+	
+	@Column(name = "boardno")
 	private int boardno; //게시글번호
+	
+	@Column(name = "reno")
 	private int reno; //부모댓글
+	
+	@Column(name = "step")
 	private int step; //순서
+	
+	@Column(name = "content")
 	private String content; //내용
 	
 	public CommentEntity(CommentDTO dto) {
-		this.comment_id = dto.getComment_id();
+		this.commentId = dto.getComment_id();
 		this.boardno = dto.getBoardno();
 		this.reno = dto.getReno();
 		this.step = dto.getStep();

@@ -1,0 +1,37 @@
+package com.spark.repository;
+
+import com.spark.Entity.UserEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends JpaRepository<UserEntity, String> {
+    
+    // 🎯 Entity 필드가 userId로 변경되었다면:
+    Optional<UserEntity> findByUserId(String userId);
+    Optional<UserEntity> findByEmail(String email);
+    Optional<UserEntity> findByPhone(String phone);
+    
+    boolean existsByUserId(String userId);
+    boolean existsByEmail(String email);
+    boolean existsByPhone(String phone);
+    
+    // ✅ 안전한 저장을 위한 메서드 추가
+    @Modifying
+    @Query("INSERT INTO UserEntity (userId, pw, name, email, phone, birthday, address1, address2, addressnum, position) " +
+           "VALUES (:userId, :pw, :name, :email, :phone, :birthday, :address1, :address2, :addressnum, :position)")
+    void insertUser(@Param("userId") String userId, 
+                   @Param("pw") String pw,
+                   @Param("name") String name,
+                   @Param("email") String email,
+                   @Param("phone") String phone,
+                   @Param("birthday") Date birthday,
+                   @Param("address1") String address1,
+                   @Param("address2") String address2,
+                   @Param("addressnum") String addressnum,
+                   @Param("position") String position);
+}

@@ -2,23 +2,35 @@ package com.spark.Entity;
 
 import com.spark.dto.SocialPaymentDTO;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Table(name = "social_payment")
 @NoArgsConstructor
 public class SocialPaymentEntity {
-	private int payment_id;//결제번호
-	private int attendance_id;//수강정보pk
-	private String payment_type;//결제종류
-	private boolean is_paid;//결제 유무
+	@Id
+	@Column(name = "payment_id")
+	private int paymentId;//결제번호
+	
+	@Column(name = "attendance_id")
+	private int attendanceId;//수강정보pk
+	
+	@Column(name = "payment_type")
+	private String paymentType;//결제종류
+	
+	@Column(name = "is_paid")
+	private boolean isPaid;//결제 유무
 	
 	public SocialPaymentEntity(SocialPaymentDTO dto) {
-		this.payment_id = dto.getPayment_id();
-		this.attendance_id = dto.getAttendance_id();
-		this.payment_type = dto.getPayment_type();
-		this.is_paid = dto.is_paid();
+		this.paymentId = dto.getPayment_id();
+		this.attendanceId = dto.getAttendance_id();
+		this.paymentType = dto.getPayment_type();
+		this.isPaid = dto.is_paid();
 	}
 }
