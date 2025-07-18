@@ -1,9 +1,0 @@
-package com.spark.repository;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import com.spark.dto.UserDTO;
-
-public interface UserRepository extends JpaRepository<UserDTO, String> {
-
-}
