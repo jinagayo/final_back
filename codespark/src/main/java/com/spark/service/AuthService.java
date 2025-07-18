@@ -13,6 +13,7 @@ import com.spark.Entity.UserEntity;
 import com.spark.dto.UserDTO;
 import com.spark.repository.AuthRepository;
 
+/*로그인 로그아웃 서비스*/
 @Service
 public class AuthService {
 
