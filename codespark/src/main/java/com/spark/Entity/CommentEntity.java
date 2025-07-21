@@ -19,6 +19,7 @@ public class CommentEntity {
 	private int commentId;//댓글 아이디
 	
 	@Column(name = "boardno")
+	private int comment_id;//댓글 아이디
 	private int boardno; //게시글번호
 	
 	@Column(name = "reno")

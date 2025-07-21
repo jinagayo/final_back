@@ -26,7 +26,7 @@ public class SocialPaymentEntity {
 	
 	@Column(name = "is_paid")
 	private boolean isPaid;//결제 유무
-	
+
 	public SocialPaymentEntity(SocialPaymentDTO dto) {
 		this.paymentId = dto.getPayment_id();
 		this.attendanceId = dto.getAttendance_id();

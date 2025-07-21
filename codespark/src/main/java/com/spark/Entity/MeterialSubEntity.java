@@ -22,6 +22,9 @@ public class MeterialSubEntity {
 	private int meterialId;//자료번호
 	
 	@Column(name = "content")
+	private int metersub_id;//자료수행id
+	
+	private int meterial_id;//자료번호
 	private String content;//과제물/메모
 	
 	@Column(name = "progress")

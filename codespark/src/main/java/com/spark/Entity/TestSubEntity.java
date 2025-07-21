@@ -19,6 +19,7 @@ public class TestSubEntity {
 	private int testsubId;//테스트풀이id
 	
 	@Column(name = "testnum")
+	private int testsub_id;//테스트풀이id
 	private int testnum;//문제번호
 	
 	@Column(name = "submit")
