@@ -15,10 +15,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClassEntity {
 	@Id
+	@Column(name = "class_id")
 	private String class_id;//강의코드
 	
-	@Column(name = "class_id")
-	private String classId;//강의코드
 	
 	@Column(name = "name")
 	private String name;//강의명
@@ -45,7 +44,7 @@ public class ClassEntity {
 	private String img;//대표이미지
 	
 	public ClassEntity(ClassDTO dto) {
-		this.classId = dto.getClass_id();
+		this.class_id = dto.getClass_id();
 		this.name = dto.getName();
 		this.detail = dto.getDetail();
 		this.price = dto.getPrice();

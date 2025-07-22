@@ -2,6 +2,7 @@ package com.spark.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -47,6 +48,9 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
+                .requestMatchers(HttpMethod.OPTIONS, "/course/List", "/course/List/").permitAll() // OPTIONS 메서드 허용
+                
+                .requestMatchers("/course/**").permitAll()
                 .anyRequest().authenticated()                   // 나머지는 인증 필요
             );
         
