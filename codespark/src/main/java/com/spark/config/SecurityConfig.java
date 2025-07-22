@@ -46,6 +46,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
+                .requestMatchers("api/admin/**").permitAll()
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
                 .anyRequest().authenticated()                   // 나머지는 인증 필요
             );

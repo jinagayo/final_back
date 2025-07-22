@@ -51,7 +51,15 @@ public class AuthController {
             if(loginResult.getStatusCode().is2xxSuccessful()) {
             	Map<String, Object> responseBody = (Map<String, Object>) loginResult.getBody();
             	if((Boolean)responseBody.get("success")) {
+            		//세션 저장
             		session.setAttribute("login", login.getUser_id());
+            		
+            		Map<String, Object> user = (Map<String, Object>) responseBody.get("user");
+            		if(user != null || user.get("position") != null) {
+            			//권한을 session으로 저장
+            			session.setAttribute("position", user.get("position"));
+            		}
+            		
             		System.out.println("session 전달됨" + login.getUser_id());
             	}
             }
