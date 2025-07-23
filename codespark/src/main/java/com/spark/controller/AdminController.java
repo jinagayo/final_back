@@ -234,9 +234,13 @@ public class AdminController {
     
  // 강사 목록 조회
     @GetMapping("/teachers")
-    public ResponseEntity<?> getTeachers(HttpSession session) {
-        Map<String, Object> response = new HashMap<>();
+    public ResponseEntity<?> getTeachers(HttpSession session,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search) {
         
+        Map<String, Object> response = new HashMap<>();
+
         try {
             // 관리자 권한 확인
             String position = (String) session.getAttribute("position");
@@ -245,27 +249,38 @@ public class AdminController {
                 response.put("message", "관리자 권한이 필요합니다.");
                 return ResponseEntity.status(403).body(response);
             }
-            
-            List<UserEntity> teachers = userService.getUsersByPosition("2"); // position = 2 (강사)
-            
+
+            // 페이징 계산
+            Pageable pageable = PageRequest.of(page - 1, size);
+            Page<UserEntity> teacherPage = userService.getTeachersPaginated(pageable, search); // 강사용 메소드 사용
+
             response.put("success", true);
-            response.put("data", teachers);
-            response.put("count", teachers.size());
-            
+            response.put("data", teacherPage.getContent()); // 강사 페이징 데이터
+            response.put("currentPage", page);
+            response.put("totalPages", teacherPage.getTotalPages());
+            response.put("totalElements", teacherPage.getTotalElements());
+            response.put("size", size);
+            response.put("hasNext", teacherPage.hasNext());
+            response.put("hasPrevious", teacherPage.hasPrevious());
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);
-            response.put("message", "강사 목록 조회 중 오류가 발생했습니다.");
+            response.put("message", "강사 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }
 
     // 학생 목록 조회
     @GetMapping("/students")
-    public ResponseEntity<?> getStudents(HttpSession session,
-    		@RequestParam(defaultValue = "1")int page,@RequestParam(defaultValue="10")int size,@RequestParam("")String search) {
+    public ResponseEntity<?> getStudents(
+            HttpSession session,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search) {  // 기본값 "" 추가
+        
         Map<String, Object> response = new HashMap<>();
         
         try {
@@ -277,27 +292,25 @@ public class AdminController {
                 return ResponseEntity.status(403).body(response);
             }
             
-            List<UserEntity> students = userService.getUsersByPosition("1"); // position = 1 (학생)
-            
-            //페이징 계산
+            // 페이징 계산
             Pageable pageable = PageRequest.of(page - 1, size);
-            Page<UserEntity> studentPage = userService.getStudentsPaginated(pageable,search);
+            Page<UserEntity> studentPage = userService.getStudentsPaginated(pageable, search);
 
             response.put("success", true);
-            response.put("data", students);
-            response.put("count", students.size());
-            response.put("data", studentPage.getContent());
+            response.put("data", studentPage.getContent());  // 페이징된 데이터만
             response.put("currentPage", page);
             response.put("totalPages", studentPage.getTotalPages());
             response.put("totalElements", studentPage.getTotalElements());
             response.put("size", size);
+            response.put("hasNext", studentPage.hasNext());
+            response.put("hasPrevious", studentPage.hasPrevious());
             
             return ResponseEntity.ok(response);
             
         } catch (Exception e) {
             e.printStackTrace();
             response.put("success", false);
-            response.put("message", "학생 목록 조회 중 오류가 발생했습니다.");
+            response.put("message", "학생 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }

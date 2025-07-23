@@ -37,10 +37,10 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     
     // 검색 기능 포함
     @Query("SELECT u FROM UserEntity u WHERE u.position = :position AND " +
-           "(u.userId LIKE %:search% OR u.name LIKE %:search% OR u.email LIKE %:search%)")
-    Page<UserEntity> findStudentsWithSearch(@Param("position") String position, 
-                                          @Param("search") String search, 
-                                          Pageable pageable);
+            "(u.userId LIKE %:search% OR u.name LIKE %:search% OR u.email LIKE %:search%)")
+     Page<UserEntity> findStudentsWithSearch(@Param("position") String position, 
+                                           @Param("search") String search, 
+                                           Pageable pageable);
     
     
 }
