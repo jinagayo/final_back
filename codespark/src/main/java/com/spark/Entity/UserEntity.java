@@ -51,8 +51,12 @@ public class UserEntity {
 	
 	@Column(nullable = false, unique = true,name="email")
 	private String email;//이메일
+	
 	@Column(nullable = true,name="img")
 	private String img;//사진
+	
+	@Column(nullable = true,name="state")
+	private String state = "ACTIVE";
 	
 	public UserEntity(UserDTO dto) {
 		this.userId = dto.getUser_id();
@@ -66,6 +70,7 @@ public class UserEntity {
 		this.position = dto.getPosition();
 		this.email = dto.getEmail();
 		this.img = dto.getImg();
+		this.state = dto.getState();
 	}
 
 

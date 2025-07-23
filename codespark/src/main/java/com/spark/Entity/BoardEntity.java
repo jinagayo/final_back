@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "board")
 @NoArgsConstructor
 public class BoardEntity {
-	@Id
+
+	@Id	
 	@Column(name = "board_id")
 	private int boardId; //게시판id(글번호)
 	

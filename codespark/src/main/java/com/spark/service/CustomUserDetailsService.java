@@ -20,8 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserEntity user = userRepository.findByUserId(username)
-				.orElseThrow(() -> new UsernameNotFoundException("Not found"));
+		UserEntity user = userRepository.findByUserId(username);
 		
 		String authority = switch(user.getPosition()) {
 			case "2" -> "ROLE_INSTRUCTOR";

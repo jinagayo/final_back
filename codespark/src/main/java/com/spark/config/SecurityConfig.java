@@ -51,10 +51,13 @@ public class SecurityConfig {
             	.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
+                .requestMatchers("api/admin/**").permitAll()
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
                 // ✅ 동영상 권한 설정
                 .requestMatchers("/video/upload").hasRole("INSTRUCTOR") // position "2" 강사만 접근 가능
                 .requestMatchers("/video/**").authenticated()
+                .requestMatchers(HttpMethod.OPTIONS, "/course/List", "/course/List/").permitAll() // OPTIONS 메서드 허용
+                .requestMatchers("/course/**").permitAll()        
                 .anyRequest().authenticated()                   // 나머지는 인증 필요
             );
         
