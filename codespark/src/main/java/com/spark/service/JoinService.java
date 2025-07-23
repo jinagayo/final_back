@@ -102,8 +102,8 @@ public class JoinService {
             teacher.setPhone(request.getPhone());
             teacher.setEmail(request.getEmail());
             
-            //관리사 승인 전 기본 권한 1
-            teacher.setPosition("1"); // 강사
+            //관리사 승인 전 기본 권한 0
+            teacher.setPosition("0"); // 강사
             teacher.setState("PENDING");	//승인 대기 상태
             
 

@@ -59,10 +59,20 @@ public class AuthController {
             		Map<String, Object> user = (Map<String, Object>) responseBody.get("user");
             		if(user != null || user.get("position") != null) {
             			//권한을 session으로 저장
-            			session.setAttribute("position", user.get("position"));
+            			String position = (String)user.get("position");
+            			
+            			//문자열을 숫자로 변환
+            			String positionNumber;
+            			switch(position) {
+            			case "admin": positionNumber = "3"; break;
+            			case "teacher" : positionNumber = "2";break;
+            			case "student" : positionNumber = "1";break;
+            			default: positionNumber= position;
+            			}
+            			
+            			session.setAttribute("position", positionNumber);
             		}
             		
-            		System.out.println("session 전달됨" + login.getUser_id());
             	}
             }
             return loginResult;
@@ -81,21 +91,23 @@ public class AuthController {
     public ResponseEntity<?> checkLoginStatus(HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            //session 받음
+            // session 받음
             String login_id = (String)session.getAttribute("login");
+            String position = (String)session.getAttribute("position");  // position도 가져오기
+            
             System.out.println("=== 세션 확인 ===");
             System.out.println("세션 ID: " + session.getId());
             System.out.println("저장된 login_id: " + login_id);
-            
+            System.out.println("저장된 position: " + position);  // position 로그 추가
+
             if(login_id != null) {
                 response.put("isLoggedIn", true);
                 response.put("user_id", login_id);
-                System.out.println("✅ 로그인 상태: " + login_id);
+                response.put("position", position);  // position 추가!
             } else {
                 response.put("isLoggedIn", false);
-                System.out.println("❌ 비로그인 상태");
             }
-            
+
             return ResponseEntity.ok(response);
         } catch(Exception e) {
             e.printStackTrace();
