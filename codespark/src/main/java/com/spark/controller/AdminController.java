@@ -5,7 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+import java.io.File;
+import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,10 +19,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.UserEntity;
 import com.spark.repository.UserRepository;
+import com.spark.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -29,6 +38,9 @@ public class AdminController {
 	@Autowired
 	private UserRepository userRepo;
 	
+	@Autowired
+	private UserService userService;
+	
 	// 승인 대기중인 강사 목록조회
 	@GetMapping("/pending-teachers")
 	public ResponseEntity<?> getPendingTeachers(HttpSession session){
@@ -39,15 +51,7 @@ public class AdminController {
 	            errorResponse.put("message", "관리자 권한이 필요합니다.");
 	            return ResponseEntity.status(403).body(errorResponse);
 	        }
-	        List<UserEntity> pendingTeachers = userRepo.findPendingTeachers();
-
-	        System.out.println("강사 신청 대기자 수: " + pendingTeachers.size());
-	        for (UserEntity teacher : pendingTeachers) {
-	            System.out.println("강사 신청자: " + teacher.getUserId() + 
-	                             ", 상태: " + teacher.getState() + 
-	                             ", 권한: " + teacher.getPosition());
-	        }
-	        
+	        List<UserEntity> pendingTeachers = userRepo.findPendingTeachers();	        
 	        Map<String, Object> response = new HashMap<>();
 	        response.put("success", true);
 	        response.put("data", pendingTeachers);
@@ -67,9 +71,7 @@ public class AdminController {
 	// 강사 승인
     @PostMapping("/approve-teacher/{userId}")
     public ResponseEntity<?> approveTeacher(@PathVariable String userId, HttpSession session) {
-        try {
-            System.out.println("강사 승인 요청: " + userId);
-            
+        try {            
             if (!isAdmin(session)) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -85,9 +87,7 @@ public class AdminController {
                 errorResponse.put("message", "사용자를 찾을 수 없습니다.");
                 return ResponseEntity.badRequest().body(errorResponse);
             }
-            
-            System.out.println("사용자 현재 상태: " + user.getState() + ", 권한: " + user.getPosition());
-            
+                        
             if (!"PENDING".equals(user.getState())) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -100,9 +100,7 @@ public class AdminController {
             user.setState("ACTIVE");    // 활성 상태로 변경
             
             UserEntity savedUser = userRepo.save(user);
-            
-            System.out.println("승인 완료 - 사용자: " + savedUser.getUserId() + ", 새 상태: " + savedUser.getState() + ", 새 권한: " + savedUser.getPosition());
-            
+                        
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
             response.put("message", "강사 승인이 완료되었습니다.");
@@ -126,9 +124,7 @@ public class AdminController {
     public ResponseEntity<?> rejectTeacher(@PathVariable String userId, 
                                          @RequestBody(required = false) Map<String, String> requestBody,
                                          HttpSession session) {
-        try {
-            System.out.println("강사 거부 요청: " + userId);
-            
+        try {            
             if (!isAdmin(session)) {
                 Map<String, Object> errorResponse = new HashMap<>();
                 errorResponse.put("success", false);
@@ -172,11 +168,143 @@ public class AdminController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
-        	
+    
+    
+    //배너 이미지 업로드
+    @PostMapping("/upload-banner")
+    public ResponseEntity<?> uploadBanner(@RequestParam("file") MultipartFile file, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // 관리자 권한 확인
+            String position = (String) session.getAttribute("position");
+            if (!"3".equals(position) && !"admin".equals(position)) {
+                response.put("success", false);
+                response.put("message", "관리자 권한이 필요합니다.");
+                return ResponseEntity.status(403).body(response);
+            }
+            
+            // 파일 검증
+            if (file.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "파일이 선택되지 않았습니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // 이미지 파일 확인
+            String contentType = file.getContentType();
+            if (!contentType.startsWith("image/")) {
+                response.put("success", false);
+                response.put("message", "이미지 파일만 업로드 가능합니다.");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            // 파일 저장 경로 설정
+            String uploadDir = "D:/codesparkReact/final_front/public/img/";
+            File directory = new File(uploadDir);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+            
+            // 기존 main.png 백업 (선택사항)
+            File existingFile = new File(uploadDir + "main.png");
+            if (existingFile.exists()) {
+                File backupFile = new File(uploadDir + "main_backup_" + System.currentTimeMillis() + ".png");
+                existingFile.renameTo(backupFile);
+            }
+            
+            // 새 파일 저장
+            File newFile = new File(uploadDir + "main.png");
+            file.transferTo(newFile);
+            
+            response.put("success", true);
+            response.put("message", "배너 이미지가 성공적으로 업로드되었습니다.");
+            response.put("imagePath", "/img/main.png");
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "파일 업로드 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+    	
+    
+ // 강사 목록 조회
+    @GetMapping("/teachers")
+    public ResponseEntity<?> getTeachers(HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // 관리자 권한 확인
+            String position = (String) session.getAttribute("position");
+            if (!"3".equals(position) && !"admin".equals(position)) {
+                response.put("success", false);
+                response.put("message", "관리자 권한이 필요합니다.");
+                return ResponseEntity.status(403).body(response);
+            }
+            
+            List<UserEntity> teachers = userService.getUsersByPosition("2"); // position = 2 (강사)
+            
+            response.put("success", true);
+            response.put("data", teachers);
+            response.put("count", teachers.size());
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "강사 목록 조회 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 학생 목록 조회
+    @GetMapping("/students")
+    public ResponseEntity<?> getStudents(HttpSession session,
+    		@RequestParam(defaultValue = "1")int page,@RequestParam(defaultValue="10")int size,@RequestParam("")String search) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // 관리자 권한 확인
+            String position = (String) session.getAttribute("position");
+            if (!"3".equals(position) && !"admin".equals(position)) {
+                response.put("success", false);
+                response.put("message", "관리자 권한이 필요합니다.");
+                return ResponseEntity.status(403).body(response);
+            }
+            
+            List<UserEntity> students = userService.getUsersByPosition("1"); // position = 1 (학생)
+            
+            //페이징 계산
+            Pageable pageable = PageRequest.of(page - 1, size);
+            Page<UserEntity> studentPage = userService.getStudentsPaginated(pageable,search);
+
+            response.put("success", true);
+            response.put("data", students);
+            response.put("count", students.size());
+            response.put("data", studentPage.getContent());
+            response.put("currentPage", page);
+            response.put("totalPages", studentPage.getTotalPages());
+            response.put("totalElements", studentPage.getTotalElements());
+            response.put("size", size);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.put("success", false);
+            response.put("message", "학생 목록 조회 중 오류가 발생했습니다.");
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+    
 	// 관리자 권한 확인
     private boolean isAdmin(HttpSession session) {
         String userPosition = (String) session.getAttribute("position");
-        System.out.println("권한 체크 - userPosition: " + userPosition);
         return "3".equals(userPosition);
     }
 }
