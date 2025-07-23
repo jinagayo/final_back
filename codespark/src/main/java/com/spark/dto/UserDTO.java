@@ -47,6 +47,8 @@ public class UserDTO {
     
     private String img;
     
+    private String state;
+    
     //비밀번호 확인 검증 메서드
     public boolean isPasswordMatching() {
         if (pw == null || confirmPassword == null) {

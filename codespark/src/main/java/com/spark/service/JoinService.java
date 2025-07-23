@@ -101,7 +101,11 @@ public class JoinService {
             teacher.setBirthday(request.getBirthday());
             teacher.setPhone(request.getPhone());
             teacher.setEmail(request.getEmail());
-            teacher.setPosition("2"); // 강사
+            
+            //관리사 승인 전 기본 권한 1
+            teacher.setPosition("1"); // 강사
+            teacher.setState("PENDING");	//승인 대기 상태
+            
 
             if (isNullOrEmpty(teacher.getPosition())) return error("권한값 누락(position)");
             if (isNullOrEmpty(teacher.getUserId()) || isNullOrEmpty(teacher.getPw()) ||
@@ -112,9 +116,10 @@ public class JoinService {
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
-            response.put("message", "강사 회원가입이 완료되었습니다!");
+            response.put("message", "강사 신청이 완료되었습니다. 관리자 승인을 기다려주세요");
             response.put("userId", savedTeacher.getUserId());
             response.put("position", savedTeacher.getPosition());
+            response.put("state", savedTeacher.getState());
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
