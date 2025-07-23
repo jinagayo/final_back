@@ -15,8 +15,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClassEntity {
 	@Id
-	private String class_id;//강의코드
-	
 	@Column(name = "class_id")
 	private String classId;//강의코드
 	

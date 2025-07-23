@@ -6,6 +6,10 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +26,9 @@ public class AuthService {
 	
 	@Autowired
 	private PasswordEncoder pwEncoder;
+	
+	@Autowired
+	private CustomUserDetailsService userDetailsService; // ✅ 소문자 시작
 	public ResponseEntity<?> authenticateUser(UserDTO login) {
 		try {
 			//아이디 검증
@@ -59,6 +66,12 @@ public class AuthService {
                 response.put("message", "비밀번호가 일치하지 않습니다.");
                 return ResponseEntity.badRequest().body(response);
 			}
+			
+			// 🔧 Spring Security 인증 객체 등록 (핵심 추가 부분)
+			UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserId());
+			UsernamePasswordAuthenticationToken authentication =
+					new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+			SecurityContextHolder.getContext().setAuthentication(authentication);
 			
 			//로그인 성공 콘솔 출력
 			System.out.println("사용자: " + user.getName() + " (" + user.getUserId() + ")");
