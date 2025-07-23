@@ -24,14 +24,14 @@ public class CustomUserDetailsService implements UserDetailsService {
 		
 		String authority = switch(user.getPosition()) {
 			case "2" -> "ROLE_INSTRUCTOR";
-			case "3" -> "ROLE_STUDENT";
-			default -> "ROLE_UNKNOWN";
+			case "1" -> "ROLE_ADMIN";
+			default ->"ROLE_STUDENT";
 		};
 		
 		return User.builder()
 				.username(user.getUserId())
 				.password(user.getPw())
-				.authorities(new SimpleGrantedAuthority(user.getPosition()))
+				.authorities(new SimpleGrantedAuthority(authority))
 				.build();
 		
 	}

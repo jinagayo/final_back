@@ -7,15 +7,21 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 
 import com.spark.Entity.UserEntity;
 import com.spark.dto.UserDTO;
 import com.spark.repository.AuthRepository;
+
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+
 
 /*로그인 로그아웃 서비스*/
 @Service
@@ -29,7 +35,7 @@ public class AuthService {
 	
 	@Autowired
 	private CustomUserDetailsService userDetailsService; // ✅ 소문자 시작
-	public ResponseEntity<?> authenticateUser(UserDTO login) {
+	public ResponseEntity<?> authenticateUser(UserDTO login, HttpServletRequest request) {
 		try {
 			//아이디 검증
 			if(login.getUser_id() == null || login.getUser_id().trim().isEmpty()) {
@@ -71,7 +77,14 @@ public class AuthService {
 			UserDetails userDetails = userDetailsService.loadUserByUsername(user.getUserId());
 			UsernamePasswordAuthenticationToken authentication =
 					new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-			SecurityContextHolder.getContext().setAuthentication(authentication);
+			SecurityContext context = SecurityContextHolder.getContext();
+			context.setAuthentication(authentication);
+			
+			// 2) 세션에 저장  ❗❗
+			HttpSession session = request.getSession(true);          // 세션 없으면 새로 만듦
+			session.setAttribute(
+			        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+			        context);
 			
 			//로그인 성공 콘솔 출력
 			System.out.println("사용자: " + user.getName() + " (" + user.getUserId() + ")");
