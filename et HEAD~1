@@ -1,0 +1,23 @@
+[33mcommit 4593976c40459310c58d1ea2783305e60237f090[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mjina[m[33m)[m
+Author: jinagayo <jinayoon90@gmail.com>
+Date:   Wed Jul 23 10:39:18 2025 +0900
+
+    video 가능할까
+
+codespark/pom.xml
+codespark/src/main/java/com/spark/Entity/AttendanceEntity.java
+codespark/src/main/java/com/spark/Entity/BoardEntity.java
+codespark/src/main/java/com/spark/Entity/ClassEntity.java
+codespark/src/main/java/com/spark/Entity/CommentEntity.java
+codespark/src/main/java/com/spark/Entity/MeterialSubEntity.java
+codespark/src/main/java/com/spark/Entity/TestSubEntity.java
+codespark/src/main/java/com/spark/Entity/UserEntity.java
+codespark/src/main/java/com/spark/config/S3Config.java
+codespark/src/main/java/com/spark/config/SecurityConfig.java
+codespark/src/main/java/com/spark/controller/VideoController.java
+codespark/src/main/java/com/spark/repository/UserRepository.java
+codespark/src/main/java/com/spark/repository/VideoRepository.java
+codespark/src/main/java/com/spark/service/AuthService.java
+codespark/src/main/java/com/spark/service/CustomUserDetailsService.java
+codespark/src/main/java/com/spark/service/S3Service.java
+codespark/src/main/resources/application.properties

@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.spark.Entity.SocialPaymentEntity;
 
 @Repository
-public interface SocialPaymentRepository extends JpaRepository<SocialPaymentEntity, String>{
+public interface SocialPaymentRepository extends JpaRepository<SocialPaymentEntity, Integer>{
 
 }

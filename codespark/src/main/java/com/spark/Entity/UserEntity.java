@@ -73,4 +73,5 @@ public class UserEntity {
 		this.state = dto.getState();
 	}
 
+
 }

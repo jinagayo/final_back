@@ -1,6 +1,8 @@
 package com.spark.repository;
 
+
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +15,8 @@ import com.spark.Entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, String> {
+
+
     boolean existsByUserId(String userId);
     boolean existsByEmail(String email);
     UserEntity findByUserId(String userId);
@@ -26,6 +30,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query("SELECT u FROM UserEntity u WHERE u.state = 'PENDING' AND " +
             "(u.position = 'teacher' OR u.position = '강사' OR u.position = '1' OR u.position = '0')")
      List<UserEntity> findPendingTeachers();
+
     
     // 페이징과 검색 조건
     Page<UserEntity> findByPositionAndUserIdContainingOrNameContainingOrEmailContaining(
