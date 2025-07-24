@@ -7,8 +7,13 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import com.spark.Entity.SocialPaymentEntity;
 import com.spark.Entity.SubjectReviewEntity;
+import com.spark.dto.AttendanceDTO;
+import com.spark.dto.SocialPaymentDTO;
 import com.spark.repository.CourseRepository;
+import com.spark.repository.SocialPaymentRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -19,6 +24,8 @@ public class CourseService {
     @Autowired
     private CourseRepository courseRepo;
 
+    @Autowired
+    private SocialPaymentRepository PayRepo;
 
 	public ResponseEntity<?> getAllCourses() {
 		List<Map<String, Object>>  CourseList = courseRepo.findAllClass();
@@ -38,6 +45,16 @@ public class CourseService {
 	public ResponseEntity<Boolean> PaymentEnd(String class_id, String login_id) {
 		
 		return null;
+	}
+
+	public void savePaymentInfo(SocialPaymentDTO payment) {
+		SocialPaymentEntity entity =  new SocialPaymentEntity(payment);
+		PayRepo.save(entity);
+		
+	}
+
+	public void saveAttendInfo(AttendanceDTO attDto) {
+		
 	}
 
 
