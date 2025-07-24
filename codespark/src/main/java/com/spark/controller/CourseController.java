@@ -45,26 +45,29 @@ public class CourseController {
     }
     
     @PostMapping("PaymentUpdate")
-    public ResponseEntity<?> updatePayment(@RequestBody SocialPaymentDTO payment,HttpSession session) {
+    public ResponseEntity<?> updatePayment(@RequestBody SocialPaymentDTO payment) {
     	System.out.println("PaymentUpdate 컨트롤러 작동중");
-        String login_id = (String)session.getAttribute("login");
         //payment update에 필요한 데이터
-        payment.setUser_id(login_id);
         payment.set_paid(true);
+        System.out.println(payment);
     	courseService.savePaymentInfo(payment);
+    	//payment의 pk 가져오기
+    	Integer paymentPK = courseService.getPaymentPK(payment.getPayment_code());
     	//attendance update에 필요한 데이터
-    	AttendanceDTO attDto = null ;
-    	attDto.setClass_id(payment.getClass_id());
+    	AttendanceDTO attDto = new  AttendanceDTO();
+    	attDto.setPaymentId(paymentPK);
+    	attDto.setStuId(payment.getUser_id());;
+    	attDto.setClassId(payment.getClass_id());
     	attDto.setPrice(payment.getPrice());
     	attDto.setState("ATT001");
-    	attDto.setStu_id(login_id);
+        System.out.println(attDto);
     	courseService.saveAttendInfo(attDto);
     	
         return ResponseEntity.ok("결제 및 수강정보 저장 완료");
     }
     
     @GetMapping("PaymentEnd")
-	public ResponseEntity<Boolean> PaymentEnd(@RequestParam String class_id){
+	public ResponseEntity<Boolean> PaymentEnd(@RequestParam String class_id,HttpSession session){
     	System.out.println("PaymentEnd 컨트롤러 작동중");
     	
     	return null;
