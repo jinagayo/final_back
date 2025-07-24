@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.spark.Entity.ClassEntity;
@@ -21,10 +22,10 @@ public interface CourseRepository extends JpaRepository<ClassEntity, String> {
 	List<Map<String, Object>> findAllClass();
 	
 	//기본
-	Page<ClassEntity> findByTeacherId(String teacherId, Pageable pageable);
+	Page<ClassEntity> findByTeachId(String teachId, Pageable pageable);
 	
 	//검색
-	Page<ClassEntity> findByTeacherIdAndTitleContainingIgnoreCase(String teacherId,  String title, Pageable pageable);
+	Page<ClassEntity> findByTeachIdAndNameContainingIgnoreCase(String teachId, String name, Pageable pageable);
 
 
 }

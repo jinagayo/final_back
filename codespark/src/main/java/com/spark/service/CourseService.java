@@ -14,8 +14,11 @@ import org.springframework.stereotype.Service;
 import com.spark.Entity.ClassEntity;
 import com.spark.controller.JoinController;
 import com.spark.dto.ClassDTO;
+import com.spark.repository.BoardRepository;
 import com.spark.repository.CourseRepository;
 import com.spark.repository.JoinRepository;
+import com.spark.repository.LectureRepository;
+import com.spark.repository.QnaRepository;
 import com.spark.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
@@ -28,12 +31,42 @@ public class CourseService {
     
     @Autowired
     private CourseRepository courseRepo;
+    @Autowired
+    private QnaRepository qnaRepo;
+    @Autowired
+    private LectureRepository lectureRepo;
 
     CourseService(JoinController joinController, CourseRepository courseRepo) {
         this.joinController = joinController;
         this.courseRepo = courseRepo;
     }
-
+    
+    public ClassDTO getClassDetail(String class_id) {
+    	//1. 강의(클래스) 엔티티 한 건 가져옴
+    	ClassEntity classEntity = courseRepo.findById(class_id).orElseThrow();
+    	
+    	//2. 해당 강의(클래스)에 소속된 강의 개수 집계
+    	int lectureCount = lectureRepo.countByClassId(class_id);
+    	
+    	//3. 해당 강의(클래스)에 소속된 Q&A 개수 집계
+    	int qnaCount = qnaRepo.countByClassId(class_id);
+    	
+    	//4. DTO(응답 객체) 생성 및 값 세팅
+    	ClassDTO dto = new ClassDTO();
+    	dto.setClass_id(classEntity.getClassId());
+    	dto.setTeach_id(classEntity.getTeachId());
+    	dto.setDetail(classEntity.getDetail());
+    	dto.setSub_id(classEntity.getSubId());
+    	dto.setPrice(classEntity.getPrice());
+    	dto.setImg(classEntity.getImg());
+    	dto.setIntro(classEntity.getIntro());
+    	dto.setName(classEntity.getName());
+    	dto.setLectureCount(lectureCount);
+    	dto.setQnaCount(qnaCount);
+    	
+    	return dto;
+    }
+    
 	public ResponseEntity<?> getAllCourses() {
 		List<Map<String, Object>>  CourseList = courseRepo.findAllClass();
 		
@@ -42,17 +75,21 @@ public class CourseService {
 
 
 	// 강사별 강의+검색+페이징
-	public Page<ClassEntity> getCoursesByTeacher(String teacherId, String search, Pageable pageable) {
-		return null;
-//		if(search != null && !search.trim().isEmpty()) {
-//			return courseRepo
-//					 .findByTeacherIdAndTitleContainingIgnoreCase(teacherId, search, pageable)
-//					.map(ClassEntity::fromEntity);
-//		} else {
-//			return courseRepo
-//					.findByTeacherId(teacherId, pageable)
-//					.map(ClassEntity::fromEntity);
-//		}
+	public Page<ClassDTO> getCoursesByTeacher(String class_id, String search, Pageable pageable) {
+	    Page<ClassEntity> result;
+	    if(search != null && !search.trim().isEmpty()) {
+	        result = courseRepo.findByTeachIdAndNameContainingIgnoreCase(class_id, search, pageable);
+	    } else {
+	        result = courseRepo.findByTeachId(class_id, pageable);
+	    }
+
+	    // **이 map 내부에서 직접 set 해줘야 함**
+	    return result.map(entity -> {
+	        ClassDTO dto = ClassDTO.fromEntity(entity);
+	        dto.setLectureCount(lectureRepo.countByClassId(entity.getClassId()));
+	        dto.setQnaCount(qnaRepo.countByClassId(entity.getClassId()));
+	        return dto;
+	    });
 	}
 
 
