@@ -1,25 +1,19 @@
 package com.spark.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.spark.Entity.ClassEntity;
-import com.spark.controller.JoinController;
-import com.spark.dto.ClassDTO;
-import com.spark.repository.BoardRepository;
+import com.spark.Entity.SocialPaymentEntity;
+import com.spark.Entity.SubjectReviewEntity;
+import com.spark.dto.AttendanceDTO;
+import com.spark.dto.SocialPaymentDTO;
 import com.spark.repository.CourseRepository;
-import com.spark.repository.JoinRepository;
-import com.spark.repository.LectureRepository;
-import com.spark.repository.QnaRepository;
-import com.spark.repository.UserRepository;
+import com.spark.repository.SocialPaymentRepository;
 
 import jakarta.transaction.Transactional;
 
@@ -27,70 +21,41 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class CourseService {
 
-    private final JoinController joinController;
-    
     @Autowired
     private CourseRepository courseRepo;
+
     @Autowired
-    private QnaRepository qnaRepo;
-    @Autowired
-    private LectureRepository lectureRepo;
+    private SocialPaymentRepository PayRepo;
 
-    CourseService(JoinController joinController, CourseRepository courseRepo) {
-        this.joinController = joinController;
-        this.courseRepo = courseRepo;
-    }
-    
-    public ClassDTO getClassDetail(String class_id) {
-    	//1. 강의(클래스) 엔티티 한 건 가져옴
-    	ClassEntity classEntity = courseRepo.findById(class_id).orElseThrow();
-    	
-    	//2. 해당 강의(클래스)에 소속된 강의 개수 집계
-    	int lectureCount = lectureRepo.countByClassId(class_id);
-    	
-    	//3. 해당 강의(클래스)에 소속된 Q&A 개수 집계
-    	int qnaCount = qnaRepo.countByClassId(class_id);
-    	
-    	//4. DTO(응답 객체) 생성 및 값 세팅
-    	ClassDTO dto = new ClassDTO();
-    	dto.setClass_id(classEntity.getClassId());
-    	dto.setTeach_id(classEntity.getTeachId());
-    	dto.setDetail(classEntity.getDetail());
-    	dto.setSub_id(classEntity.getSubId());
-    	dto.setPrice(classEntity.getPrice());
-    	dto.setImg(classEntity.getImg());
-    	dto.setIntro(classEntity.getIntro());
-    	dto.setName(classEntity.getName());
-    	dto.setLectureCount(lectureCount);
-    	dto.setQnaCount(qnaCount);
-    	
-    	return dto;
-    }
-    
-	public ResponseEntity<?> getAllCourses() {
-		List<Map<String, Object>>  CourseList = courseRepo.findAllClass();
-		
-	    return ResponseEntity.ok(CourseList);
-	}
+   public ResponseEntity<?> getAllCourses() {
+      List<Map<String, Object>>  CourseList = courseRepo.findAllClass();
+      
+       return ResponseEntity.ok(CourseList);
+   }
 
+   public ResponseEntity<?> getCourses(String classId) {
+      List<Map<String, Object>>  courseRawData  = courseRepo.ClassDetail(classId);
+        Map<String, Object> courseDetailOrigin = courseRawData.get(0);
+        Map<String, Object> courseDetail = new HashMap<>(courseDetailOrigin); 
+      List<SubjectReviewEntity> reviews = courseRepo.findReview(classId);
+      courseDetail.put("reviews", reviews);
+       return ResponseEntity.ok(courseDetail);
+   }
 
-	// 강사별 강의+검색+페이징
-	public Page<ClassDTO> getCoursesByTeacher(String class_id, String search, Pageable pageable) {
-	    Page<ClassEntity> result;
-	    if(search != null && !search.trim().isEmpty()) {
-	        result = courseRepo.findByTeachIdAndNameContainingIgnoreCase(class_id, search, pageable);
-	    } else {
-	        result = courseRepo.findByTeachId(class_id, pageable);
-	    }
+   public ResponseEntity<Boolean> PaymentEnd(String class_id, String login_id) {
+      
+      return null;
+   }
 
-	    // **이 map 내부에서 직접 set 해줘야 함**
-	    return result.map(entity -> {
-	        ClassDTO dto = ClassDTO.fromEntity(entity);
-	        dto.setLectureCount(lectureRepo.countByClassId(entity.getClassId()));
-	        dto.setQnaCount(qnaRepo.countByClassId(entity.getClassId()));
-	        return dto;
-	    });
-	}
+   public void savePaymentInfo(SocialPaymentDTO payment) {
+      SocialPaymentEntity entity =  new SocialPaymentEntity(payment);
+      PayRepo.save(entity);
+      
+   }
+
+   public void saveAttendInfo(AttendanceDTO attDto) {
+      
+   }
 
 
 
