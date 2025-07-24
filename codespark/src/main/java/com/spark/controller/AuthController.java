@@ -58,7 +58,7 @@ public class AuthController {
             		if(user != null || user.get("position") != null) {
             			//권한을 session으로 저장
             			String position = (String)user.get("position");
-            			
+            			String name = (String)user.get("name");
             			//문자열을 숫자로 변환
             			String positionNumber;
             			switch(position) {
@@ -69,6 +69,7 @@ public class AuthController {
             			}
             			
             			session.setAttribute("position", positionNumber);
+            			session.setAttribute("name", name);
             		}
             		
             	}
@@ -92,6 +93,7 @@ public class AuthController {
             // session 받음
             String login_id = (String)session.getAttribute("login");
             String position = (String)session.getAttribute("position");  // position도 가져오기
+            String name = (String)session.getAttribute("name");
             
             System.out.println("=== 세션 확인 ===");
             System.out.println("세션 ID: " + session.getId());
@@ -101,6 +103,7 @@ public class AuthController {
             if(login_id != null) {
                 response.put("isLoggedIn", true);
                 response.put("user_id", login_id);
+                response.put("name", name);
                 response.put("position", position);  // position 추가!
             } else {
                 response.put("isLoggedIn", false);
