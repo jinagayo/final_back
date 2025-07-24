@@ -1,3 +1,4 @@
+
 package com.spark.config;
 
 import org.springframework.context.annotation.Bean;
@@ -49,7 +50,7 @@ public class SecurityConfig {
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
                 .requestMatchers("api/admin/**").permitAll()
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
-                .requestMatchers(HttpMethod.OPTIONS, "/course/List", "/course/List/").permitAll() // OPTIONS 메서드 허용
+                .requestMatchers(HttpMethod.OPTIONS, "/course/**", "/course/**/**").permitAll() // OPTIONS 메서드 허용
                 
                 .requestMatchers("/course/**").permitAll()
                 .anyRequest().authenticated()                   // 나머지는 인증 필요
