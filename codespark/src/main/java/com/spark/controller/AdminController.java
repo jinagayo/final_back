@@ -24,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.UserEntity;
+import com.spark.dto.CodingDTO;
 import com.spark.repository.UserRepository;
+import com.spark.service.CodingService;
 import com.spark.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -40,6 +42,9 @@ public class AdminController {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private CodingService coService;
 	
 	// 승인 대기중인 강사 목록조회
 	@GetMapping("/pending-teachers")
@@ -312,6 +317,30 @@ public class AdminController {
             response.put("success", false);
             response.put("message", "학생 목록 조회 중 오류가 발생했습니다: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
+        }
+    }
+    
+    
+    
+    //코딩문제 업로드
+    @PostMapping("/problem-upload")
+    public ResponseEntity<?> createProblem(@RequestBody CodingDTO codingDTO, HttpSession session) {
+        try {
+            Map<String, Object> result = coService.createProblemWithValidation(codingDTO, session);
+            
+            if ((Boolean) result.get("success")) {
+                return ResponseEntity.ok(result);
+            } else {
+                int statusCode = (Integer) result.getOrDefault("statusCode", 400);
+                return ResponseEntity.status(statusCode).body(result);
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "문제 등록 중 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
         }
     }
     
