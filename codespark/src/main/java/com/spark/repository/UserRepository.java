@@ -13,7 +13,6 @@ import com.spark.Entity.UserEntity;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, String> {
-
     boolean existsByUserId(String userId);
     boolean existsByEmail(String email);
     UserEntity findByUserId(String userId);

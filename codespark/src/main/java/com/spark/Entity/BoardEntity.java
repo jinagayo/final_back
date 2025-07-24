@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "board")
 @NoArgsConstructor
 public class BoardEntity {
-	@Id
+	@Id	
 	@Column(name = "board_id")
 	private int boardId; //게시판id(글번호)
 	
