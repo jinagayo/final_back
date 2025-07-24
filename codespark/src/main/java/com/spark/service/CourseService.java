@@ -35,9 +35,6 @@ public class CourseService {
     @Autowired
     private SocialPaymentRepository PayRepo;
 
-    CourseService(JoinController joinController) {
-        this.joinController = joinController;
-    }
 
 	public ResponseEntity<?> getAllCourses() {
 		List<Map<String, Object>>  CourseList = courseRepo.findAllClass();

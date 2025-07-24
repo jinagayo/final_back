@@ -86,6 +86,19 @@
 		    <artifactId>mysql-connector-java</artifactId>
 		    <version>8.0.33</version>
 		</dependency>
+			 <!-- AWS SDK for Java v2 -->
+    <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>s3</artifactId>
+        <version>2.20.40</version> <!-- 버전은 최신으로 -->
+    </dependency>
+
+    <!-- 파일 업로드를 위한 Commons IO (선택) -->
+    <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>2.11.0</version>
+    </dependency>
 	</dependencies>
 	<build>
 		<plugins>
