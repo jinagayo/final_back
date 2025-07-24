@@ -10,7 +10,8 @@ import lombok.Setter;
 //소셜결제
 public class SocialPaymentDTO {
 	private int payment_id;//결제번호
-	private int attendance_id;//수강정보pk
+	private int class_id;//수강정보pk
 	private String payment_type;//결제종류
+	private String payment_code;//결제 코드
 	private boolean is_paid;//결제 유무
 }
