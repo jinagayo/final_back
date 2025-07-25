@@ -24,7 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.UserEntity;
+import com.spark.dto.ClassInfoDTO;
+import com.spark.repository.CourseRepository;
 import com.spark.repository.UserRepository;
+import com.spark.service.CourseService;
 import com.spark.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -40,6 +43,9 @@ public class AdminController {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private CourseService courseservice;
 	
 	// 승인 대기중인 강사 목록조회
 	@GetMapping("/pending-teachers")
@@ -307,4 +313,27 @@ public class AdminController {
         String userPosition = (String) session.getAttribute("position");
         return "3".equals(userPosition);
     }
+
+    // 강의 리스트 조회
+    @GetMapping("/class/ClassList")
+    public ResponseEntity<?> rejectTeacher() {
+    	System.out.println("ClassList 컨트롤러 작동");
+    	List<ClassInfoDTO> data = courseservice.findAllRequest();
+    	for(ClassInfoDTO d : data) System.out.println(d);
+        return ResponseEntity.ok().body(data);
+    
+    }
+    //
+    @PostMapping("/class/Request/{classId}/{action}")
+    public ResponseEntity<?> Request(@PathVariable(name="classId") String classId,@PathVariable(name="action") String action,HttpSession session ) {
+    	System.out.println("Request 컨트롤러 작동");
+    	String id = (String)session.getAttribute("login");
+    	courseservice.requestSolve(id,classId,action);
+    	
+    	
+        return ResponseEntity.ok("");
+    	
+    
+    }
+    
 }
