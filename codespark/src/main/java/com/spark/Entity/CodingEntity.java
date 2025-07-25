@@ -21,7 +21,10 @@ public class CodingEntity {
 	@Column(name = "code_id")
 	private int codeId;//코딩문제id
 	
-	@Column(name = "qeustion")
+	@Column(name = "title")
+	private String title;
+	
+	@Column(name = "question")
 	private String qeustion;//문제
 	
 	@Column(name = "type")
@@ -59,6 +62,7 @@ public class CodingEntity {
 	
 	public CodingEntity(CodingDTO dto) {
 		this.codeId = dto.getCode_id();
+		this.title = dto.getTitle();
 		this.qeustion = dto.getQeustion();
 		this.type = dto.getType();
 		this.level = dto.getLevel();
