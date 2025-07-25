@@ -62,11 +62,12 @@ public class ClassEntity {
 	@Column(name="state")
 	private String state;
 	
-	@Column(name = "created_at")
+	@Column(name = "created_at", insertable = false, updatable = false)
 	private Timestamp createdAt;
 
-	@Column(name = "updated_at")
+	@Column(name = "updated_at", insertable = false, updatable = false)
 	private Timestamp updatedAt;
+
 	
 	@Column(name="updated_by")
 	private String updatedBy;
@@ -85,9 +86,10 @@ public class ClassEntity {
 		this.teachId = dto.getTeachId();
 		this.subId = dto.getSubId();
 		this.img = dto.getImg();
-		this.createdAt=createdAt;
-		this.updatedAt=updatedAt;
-		this.createdBy=createdBy;
-		this.updatedBy=updatedBy;
+		this.state = dto.getState();
+		this.createdAt=dto.getCreatedAt();
+		this.updatedAt=dto.getUpdatedAt();
+		this.createdBy=dto.getCreatedBy();
+		this.updatedBy=dto.getUpdatedBy();
 	}
 }

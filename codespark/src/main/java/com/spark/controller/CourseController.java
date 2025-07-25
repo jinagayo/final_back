@@ -98,6 +98,7 @@ public class CourseController {
     	System.out.println("formsubmit 작동중");
     	submit.setTeachId(id);
     	submit.setCreatedBy(id);
+    	submit.setState("STA002");
     	System.out.println("SUBMIT:"+submit);
     	courseService.teacherApplication(submit);
     	

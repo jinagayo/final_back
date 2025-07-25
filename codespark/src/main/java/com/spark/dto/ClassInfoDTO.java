@@ -13,7 +13,7 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ClassInfoDTO {
-	private String classId;//강의코드
+	private int classId;//강의코드
 	private String name;//강의명
 	private String detail;//강의설명
 	private int price;//가격
@@ -26,13 +26,11 @@ public class ClassInfoDTO {
 	private Timestamp   createdAt;
 	private Timestamp   updatedAt;
 
-	private int lectureCount;  //강의수
-	private int qnaCount;    //qna개수
 	private String updatedBy;
 	private String createdBy;
 	
 	
-    public ClassInfoDTO(String classId, String name, String detail, int price, String intro,
+    public ClassInfoDTO(int classId, String name, String detail, int price, String intro,
             double mark, String img, String teacher, String subject, String state,Timestamp   createdAt, Timestamp   updatedAt, String updatedBy, String createdBy) {
 	this.classId = classId;
 	this.name = name;
@@ -45,9 +43,9 @@ public class ClassInfoDTO {
 	this.subject = subject;
 	this.state = state;
 	this.createdAt=createdAt;
-	this.createdAt=createdAt;
+	this.updatedAt=updatedAt;
 	
 	this.createdBy=createdBy;
-	this.createdBy=updatedBy;
+	this.updatedBy=updatedBy;
 	}
 }
