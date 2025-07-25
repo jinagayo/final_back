@@ -13,6 +13,7 @@ import lombok.Setter;
 //코딩문제
 public class CodingDTO {
 	private int code_id;//코딩문제id
+	private String title; // 제목
 	private String qeustion;//문제
 	private String type;//문제종류
 	private int level;//난이도

@@ -349,4 +349,5 @@ public class AdminController {
         String userPosition = (String) session.getAttribute("position");
         return "3".equals(userPosition);
     }
+
 }
