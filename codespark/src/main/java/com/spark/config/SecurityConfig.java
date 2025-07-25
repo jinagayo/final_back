@@ -1,4 +1,3 @@
-
 package com.spark.config;
 
 import org.springframework.context.annotation.Bean;
@@ -52,7 +51,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 //  회원가입, 로그인, 홈, 기본 경로 허용
-                .requestMatchers("/auth/**", "/join/**", "/login", "/", "/home").permitAll()
+                .requestMatchers("/auth/**", "/join/**", "/login", "/", "/home","/board/**").permitAll()
 
                 //  강의 리스트와 상세페이지는 모두에게 허용
                 .requestMatchers("/course/List", "/course/Detail").permitAll()
@@ -78,5 +77,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
 }

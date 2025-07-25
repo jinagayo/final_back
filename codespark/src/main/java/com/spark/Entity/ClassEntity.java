@@ -34,7 +34,7 @@ public class ClassEntity {
 
 	@Column(name = "is_active")
     private boolean isActive = true;
-	
+
 	@Column(name = "name")
 	private String name;//강의명
 	
