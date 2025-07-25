@@ -19,7 +19,7 @@ public class ClassEntity {
 	@Id
 	@Column(name = "class_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private String class_id;//강의코드
+	private int class_id;//강의코드
 	
 	
 	@Column(name = "name")
