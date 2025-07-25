@@ -44,6 +44,7 @@ public class ClassEntity {
 	
 	private int lectureCount;
 	private int qnaCount;
+	private int studentCount; 
 	
 	public ClassEntity(ClassDTO dto) {
 		this.classId = dto.getClass_id();

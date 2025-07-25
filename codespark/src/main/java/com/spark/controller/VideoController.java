@@ -11,12 +11,15 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.UserEntity;
+import com.spark.dto.VideoUploadRequest;
+import com.spark.repository.MeterialRepository;
 import com.spark.repository.UserRepository;
 import com.spark.repository.VideoRepository;
 import com.spark.service.S3Service;
@@ -29,10 +32,11 @@ import lombok.RequiredArgsConstructor;
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
 public class VideoController {
 	private final S3Service s3Service;
+	private final MeterialRepository meterialRepository;
 	
 	// 강사(2)만 업로드 가능
 	@PostMapping("/upload")
-	public ResponseEntity<?> upload(@RequestParam String filename, Principal principal) {
+	public ResponseEntity<?> saveVideo(@RequestParam String filename, Principal principal) {
 	    // 🔍 인증 확인 로그
 	    System.out.println("📍 Principal: " + (principal != null ? principal.getName() : "null"));
 
@@ -46,5 +50,21 @@ public class VideoController {
 	    String key = "videos/" + UUID.randomUUID() + "_" + filename;
 	    String uploadUrl = s3Service.generatePresignedUploadUrl(key);
 	    return ResponseEntity.ok(Map.of("uploadUrl", uploadUrl, "key", key));
+	}
+
+	@PostMapping("/save")
+	public ResponseEntity<?> saveVideoMeterial(@RequestBody VideoUploadRequest request){
+		MeterialEntity video = new MeterialEntity();
+		 int nextSeq = meterialRepository.findNextSeqByClassId(request.getClassId()) + 1;
+
+		video.setTitle(request.getTitle());
+		video.setContent(request.getKey());
+		video.setClassId(request.getClassId());
+		video.setDetail(request.getDetail());
+		video.setType("MET001");
+		video.setSeq(nextSeq);
+		
+		meterialRepository.save(video);
+		return ResponseEntity.ok("저장완료");
 	}
 }

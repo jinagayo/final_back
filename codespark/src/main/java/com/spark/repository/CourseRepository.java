@@ -37,8 +37,7 @@ public interface CourseRepository extends JpaRepository<ClassEntity, String> {
 	List<Map<String, Object>> ClassDetail(@Param("classId")String classId);
 
 	@Query(value = "SELECT * FROM subject_review  WHERE class_id = :classId",nativeQuery = true)
-	List<SubjectReviewEntity> findReview(@Param("classId") String classId);
-	
+	List<SubjectReviewEntity> findReview(@Param("classId") String classId);	
 
 
 

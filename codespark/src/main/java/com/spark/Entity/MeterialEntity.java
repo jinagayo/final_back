@@ -33,6 +33,12 @@ public class MeterialEntity {
 	@Column(name = "time")
 	private int time;//동영상길이
 	
+	@Column(name = "title")
+	private String title;
+	
+	@Column(name = "detail")
+	private String detail;
+	
 	public MeterialEntity(MeterialDTO dto) {
 		this.meterId = dto.getMeter_id();
 		this.classId = dto.getClass_id();
@@ -40,5 +46,7 @@ public class MeterialEntity {
 		this.content = dto.getContent();
 		this.type = dto.getType();
 		this.time = dto.getTime();
+		this.title = dto.getTitle();
+		this.detail = dto.getDetail(); 
 	}
 }
