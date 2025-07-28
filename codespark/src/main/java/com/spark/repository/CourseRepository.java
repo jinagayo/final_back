@@ -13,7 +13,7 @@ import com.spark.Entity.SubjectReviewEntity;
 import com.spark.dto.ClassDTO;
 
 @Repository
-public interface CourseRepository extends JpaRepository<ClassEntity, String> {
+public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
 
 	@Query(value = "SELECT c.class_id as classId, c.name as name, c.detail, c.price, c.intro, c.mark, c.img, u.name as teacher, com.name as subject " +
             "FROM `class` c JOIN `user` u ON c.teach_id = u.user_id JOIN `common` com ON c.sub_id = com.com_id",

@@ -2,6 +2,10 @@ package com.spark.controller;
 
 import com.spark.dto.BoardDTO;
 import com.spark.service.BoardService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +43,7 @@ public class BoardController {
             
             // 검색 조건에 따른 게시글 조회
             Page<BoardDTO> boardPage = boardService.getBoardList(boardnum, search, pageable);
-            
+    
             // React 컴포넌트에서 기대하는 형식으로 데이터 변환
             List<Map<String, Object>> notices = boardPage.getContent().stream()
                 .map(this::convertToNoticeFormat)
@@ -63,7 +67,8 @@ public class BoardController {
         }
     }
     
-    @PostMapping("/api/notices/{boardId}/view")
+    //조회수
+    @PostMapping("/notices/{boardId}/view")
     public ResponseEntity<ApiResponse> increaseViewCount(@PathVariable int boardId) {
         try {
             boardService.increaseHits(boardId);
@@ -74,7 +79,8 @@ public class BoardController {
         }
     }
     
-    @GetMapping("/api/notices/{boardId}")
+    //게시물 상세
+    @GetMapping("/detail/{boardId}")
     public ResponseEntity<ApiResponse> getBoardDetail(@PathVariable int boardId) {
         try {
             BoardDTO board = boardService.getBoardById(boardId);
@@ -91,10 +97,21 @@ public class BoardController {
         }
     }
     
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse> createBoard(@RequestBody BoardDTO boardDTO) {
-        try {
+  //게시글 작성
+    @PostMapping("/write/{boardnum}")
+    public ResponseEntity<ApiResponse> createBoard(@RequestBody BoardDTO boardDTO, @PathVariable String boardnum,HttpServletRequest request) {
+        try {            
+            HttpSession session = request.getSession();
+            String userId = (String)session.getAttribute("login");
+            
+            if(userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+            }
+            boardDTO.setUser_id(userId);
+            boardDTO.setBoardnum(boardnum);
+            
             BoardDTO createdBoard = boardService.createBoard(boardDTO);
+            
             return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -102,6 +119,7 @@ public class BoardController {
         }
     }
     
+    //게시글 수정
     @PutMapping("/{boardId}")
     public ResponseEntity<ApiResponse> updateBoard(@PathVariable int boardId, @RequestBody BoardDTO boardDTO) {
         try {
