@@ -29,7 +29,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(Arrays.asList("*")); // 모든 origin 허용 (개발용)
+        configuration.setAllowedOriginPatterns(Arrays.asList("http://localhost:3000")); // 모든 origin 허용 (개발용)
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
@@ -46,8 +46,8 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
             .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (REST API용)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
+                .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/api/admin/**").permitAll()
                 .requestMatchers("/board/**").permitAll()
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용

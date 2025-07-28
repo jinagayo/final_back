@@ -1,6 +1,9 @@
 package com.spark.controller;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -9,7 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import com.spark.dto.UserDTO;
 import com.spark.service.JoinService;
@@ -17,6 +22,7 @@ import com.spark.service.JoinService;
 @RestController
 @RequestMapping("/join")
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
+@EnableWebMvc
 public class JoinController {
     
     @Autowired
@@ -24,8 +30,9 @@ public class JoinController {
     
     // 학생 회원가입
     @PostMapping("/signup/student")
+    @ResponseBody 
     public ResponseEntity<?> signupStudent(@RequestBody UserDTO request) {
-        return userService.createStudent(request);
+    	return userService.createStudent(request);
     }
     
     // 강사 회원가입
