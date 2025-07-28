@@ -106,6 +106,17 @@ public class CourseService {
 		
 	}
 
+	public List<Map<String, Object>>  findClass(String classId) {
+		List<Map<String, Object>>  data = courseRepo.ClassDetail(classId);
+		return data;
+	}
+
+	public void deleteClass(String classId) {
+		Integer id = Integer.parseInt(classId);
+		courseRepo.deleteById(id);
+		
+	}
+
 
 
 
