@@ -1,5 +1,8 @@
 package com.spark.Entity;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import com.spark.dto.CodingDTO;
 
 import jakarta.persistence.Column;
@@ -18,7 +21,10 @@ public class CodingEntity {
 	@Column(name = "code_id")
 	private int codeId;//코딩문제id
 	
-	@Column(name = "qeustion")
+	@Column(name = "title")
+	private String title;
+	
+	@Column(name = "question")
 	private String qeustion;//문제
 	
 	@Column(name = "type")
@@ -39,8 +45,24 @@ public class CodingEntity {
 	@Column(name = "model_answer")
 	private String modelAnswer;//모범답안
 	
+	@Column(name = "create_at")
+	private LocalDateTime createAt;
+	
+	@Column(name = "create_by")
+	private String createBy;
+	
+	@Column(name = "update_at")
+	private LocalDateTime updateAt;
+	
+	@Column(name = "update_by")
+	private String updateBy;
+	
+	@Column(name = "is_active")
+	private int isActive;
+	
 	public CodingEntity(CodingDTO dto) {
 		this.codeId = dto.getCode_id();
+		this.title = dto.getTitle();
 		this.qeustion = dto.getQeustion();
 		this.type = dto.getType();
 		this.level = dto.getLevel();
@@ -48,5 +70,10 @@ public class CodingEntity {
 		this.language = dto.getLanguage();
 		this.testCase = dto.getTest_case();
 		this.modelAnswer = dto.getModel_answer();
+		this.createAt = dto.getCreate_at();
+		this.createBy = dto.getCreate_by();
+		this.updateAt = dto.getUpdate_at();
+		this.updateBy = dto.getUpdate_by();
+		this.isActive = dto.getIs_active();
 	}
 }
