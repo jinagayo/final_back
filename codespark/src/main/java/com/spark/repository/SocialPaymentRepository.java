@@ -7,5 +7,5 @@ import com.spark.Entity.SocialPaymentEntity;
 
 @Repository
 public interface SocialPaymentRepository extends JpaRepository<SocialPaymentEntity, Integer>{
-
+	SocialPaymentEntity findByPaymentCode(String payment_code);
 }

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 //소셜결제
 public class SocialPaymentDTO {
 	private int payment_id;//결제번호

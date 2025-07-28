@@ -1,4 +1,3 @@
-
 package com.spark.config;
 
 import org.springframework.context.annotation.Bean;
@@ -45,24 +44,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 적용
-            .csrf(csrf -> csrf.disable()) // CSRF 비활성화 (REST API용)
-
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-            	.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
-                .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
-                .requestMatchers("api/admin/**").permitAll()
-                .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
-                // ✅ 동영상 권한 설정
-                .requestMatchers("/video/upload").hasRole("INSTRUCTOR") // position "2" 강사만 접근 가능
+                // preflight OPTIONS 요청 허용
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                //  회원가입, 로그인, 홈, 기본 경로 허용
+                .requestMatchers("/auth/**", "/join/**", "/login", "/", "/home","/board/**").permitAll()
+
+                //  강의 리스트와 상세페이지는 모두에게 허용
+                .requestMatchers("/course/List", "/course/Detail").permitAll()
+
+                // ✅강사만 접근 가능한 영역
+                .requestMatchers("/course/teacher/**").hasRole("INSTRUCTOR")
+
+                //  나머지 course는 로그인만 되어 있으면 접근 가능
+                .requestMatchers("/course/**").authenticated()
+
+                //  동영상 업로드는 강사만
+                .requestMatchers("/video/upload").hasRole("INSTRUCTOR")
+
+                //  영상 전체 접근은 로그인 필요
                 .requestMatchers("/video/**").authenticated()
-                .requestMatchers(HttpMethod.OPTIONS, "/course/List", "/course/List/").permitAll() // OPTIONS 메서드 허용
-                .requestMatchers("/course/**").permitAll()        
-                .anyRequest().authenticated()                   // 나머지는 인증 필요
+
+                //  관리자 API 열어둠 (이건 테스트용 주의)
+                .requestMatchers("/api/admin/**").permitAll()
+
+                // 나머지는 인증 필요
+                .anyRequest().authenticated()
             );
-        
+
         return http.build();
     }
-
 }
