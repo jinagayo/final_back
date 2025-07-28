@@ -1,9 +1,14 @@
 package com.spark.controller;
 
+import java.net.URL;
 import java.security.Principal;
+import java.sql.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.UserEntity;
+import com.spark.dto.MeterialDTO;
 import com.spark.dto.VideoUploadRequest;
 import com.spark.repository.MeterialRepository;
 import com.spark.repository.UserRepository;
@@ -26,11 +32,17 @@ import com.spark.service.S3Service;
 
 import lombok.RequiredArgsConstructor;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.HttpMethod;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/video")
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
 public class VideoController {
+    private final AmazonS3 amazonS3;
 	private final S3Service s3Service;
 	private final MeterialRepository meterialRepository;
 	
@@ -67,4 +79,38 @@ public class VideoController {
 		meterialRepository.save(video);
 		return ResponseEntity.ok("저장완료");
 	}
-}
+	
+	@GetMapping("/material/{id}")
+	public ResponseEntity<?> getMaterialById(@PathVariable String id){
+		int meterId = Integer.parseInt(id); 
+		 MeterialEntity meterial = meterialRepository.findByMeterId(meterId); // 이게 null이라면
+		 
+		 if (meterial == null) {
+		        return ResponseEntity.status(404).body("해당 자료를 찾을 수 없습니다.");
+		    }
+		    return ResponseEntity.ok(new MeterialDTO(meterial.getMeterId(), meterial.getContent()));
+		    
+		}
+	
+	@GetMapping("/stream")
+	public ResponseEntity<?> getVideoStreamUrl(@RequestParam String key){
+		 final String bucketName = "my-lecture-video"; 
+		try {
+			//유효시간 1시간 짜리 presigned URL 생성
+			Date expiration = new Date(System.currentTimeMillis() + 1000 * 60 * 60);
+			GeneratePresignedUrlRequest request = new GeneratePresignedUrlRequest(bucketName, key)
+					.withMethod(HttpMethod.GET)
+					.withExpiration(expiration);
+			
+			URL url = amazonS3.generatePresignedUrl(request);
+			
+			Map<String, String> response = new HashMap<>();
+			response.put("videoUrl",url.toString());
+			
+			return ResponseEntity.ok(response);
+		} catch(AmazonServiceException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body("S3 URL 생성 중 오류 발생: " + e.getMessage());
+		}
+	}
+	}

@@ -33,4 +33,13 @@ public class MeterialDTO {
 		
 		return dto;
 	}
+
+	public MeterialDTO(int meter_id2, String content2) {
+		meter_id = meter_id2;
+		content = content2;
+	}
+
+	public MeterialDTO() {
+		
+	}
 }
