@@ -10,8 +10,8 @@ import lombok.ToString;
 @Data
 //강사
 public class TeacherDTO {
-	private String teach_id; // 강사id
-	private String sub_id; //과목코드
+	private String teachId; // 강사id
+	private String subId; //과목코드
 	private String career; // 경력사항
 	private String introduce; // 자기소개
 }

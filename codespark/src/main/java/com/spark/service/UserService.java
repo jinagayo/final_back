@@ -1,19 +1,31 @@
 package com.spark.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import com.spark.repository.StudentRepository;
+import com.spark.repository.TeacherRepository;
 import com.spark.repository.UserRepository;
+import com.spark.Entity.StudentEntity;
+import com.spark.Entity.TeacherEntity;
 import com.spark.Entity.UserEntity;
+import com.spark.dto.StudentDTO;
+import com.spark.dto.TeacherDTO;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private TeacherRepository teacherRepository;
 
     public List<UserEntity> getUsersByPosition(String position) {
         return userRepository.findByPosition(position);
@@ -37,5 +49,31 @@ public class UserService {
             return userRepository.findStudentsWithSearch("2", search.trim(), pageable);
         }
     }
+
+    public UserEntity UserProfile(String id) {
+        return userRepository.findById(id)
+                 .orElse(null); 
+    }
+
+	public StudentEntity Student(String id) {
+		return studentRepository.findById(id)
+                .orElse(null); 
+	}
+
+	public StudentEntity StudentUpdate(StudentDTO dto) {
+		StudentEntity  entity = new StudentEntity(dto);
+		return studentRepository.save(entity);
+	}
+
+	public TeacherEntity Teacher(String id) {
+		return teacherRepository.findById(id)
+                .orElse(null); 
+	}
+
+	public TeacherEntity TeacherUpdate(TeacherDTO dto) {
+		TeacherEntity  entity = new TeacherEntity(dto);
+		return teacherRepository.save(entity);
+	
+	}
 
 }

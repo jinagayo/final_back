@@ -15,7 +15,7 @@ import lombok.Setter;
 @Data
 //강의목록
 public class ClassDTO {
-	private int class_id;//강의코드
+	private int classId;//강의코드
 	private String name;//강의명
 	private String detail;//강의설명
 	private int price;//가격
