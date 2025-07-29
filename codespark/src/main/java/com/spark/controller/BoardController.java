@@ -1,7 +1,16 @@
 package com.spark.controller;
 
+import com.spark.dto.ApiResponseComment;
 import com.spark.dto.BoardDTO;
+import com.spark.dto.CommentDTO;
+import com.spark.dto.CommentRequestDTO;
 import com.spark.service.BoardService;
+import com.spark.service.CommentService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +32,9 @@ public class BoardController {
     @Autowired
     private BoardService boardService;
     
+    @Autowired
+    private CommentService commService;
+    
     
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> getBoardList(
@@ -39,7 +51,7 @@ public class BoardController {
             
             // 검색 조건에 따른 게시글 조회
             Page<BoardDTO> boardPage = boardService.getBoardList(boardnum, search, pageable);
-            
+    
             // React 컴포넌트에서 기대하는 형식으로 데이터 변환
             List<Map<String, Object>> notices = boardPage.getContent().stream()
                 .map(this::convertToNoticeFormat)
@@ -63,7 +75,8 @@ public class BoardController {
         }
     }
     
-    @PostMapping("/api/notices/{boardId}/view")
+    //조회수
+    @PostMapping("/notices/{boardId}/view")
     public ResponseEntity<ApiResponse> increaseViewCount(@PathVariable int boardId) {
         try {
             boardService.increaseHits(boardId);
@@ -74,7 +87,8 @@ public class BoardController {
         }
     }
     
-    @GetMapping("/api/notices/{boardId}")
+    //게시물 상세
+    @GetMapping("/detail/{boardId}")
     public ResponseEntity<ApiResponse> getBoardDetail(@PathVariable int boardId) {
         try {
             BoardDTO board = boardService.getBoardById(boardId);
@@ -91,10 +105,21 @@ public class BoardController {
         }
     }
     
-    @PostMapping("/create")
-    public ResponseEntity<ApiResponse> createBoard(@RequestBody BoardDTO boardDTO) {
-        try {
+  //게시글 작성
+    @PostMapping("/write/{boardnum}")
+    public ResponseEntity<ApiResponse> createBoard(@RequestBody BoardDTO boardDTO, @PathVariable String boardnum,HttpServletRequest request) {
+        try {            
+            HttpSession session = request.getSession();
+            String userId = (String)session.getAttribute("login");
+            
+            if(userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+            }
+            boardDTO.setUser_id(userId);
+            boardDTO.setBoardnum(boardnum);
+            
             BoardDTO createdBoard = boardService.createBoard(boardDTO);
+            
             return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -102,6 +127,7 @@ public class BoardController {
         }
     }
     
+    //게시글 수정
     @PutMapping("/{boardId}")
     public ResponseEntity<ApiResponse> updateBoard(@PathVariable int boardId, @RequestBody BoardDTO boardDTO) {
         try {
@@ -190,5 +216,84 @@ public class BoardController {
         
         public int getTotalPage() { return totalPage; }
         public void setTotalPage(int totalPage) { this.totalPage = totalPage; }
+    }
+    
+    //댓글조회
+    @GetMapping("/{boardno}/comments")
+    public ResponseEntity<ApiResponseComment<List<CommentDTO>>> getComments(
+            @PathVariable("boardno") int boardno) {
+        
+        try {
+            List<CommentDTO> comments = commService.getCommentsByBoardno(boardno);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 목록 조회 성공", comments));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 목록 조회 중 오류가 발생했습니다."));
+        }
+    }
+    
+    //댓글작성
+    @PostMapping("/{boardno}/comments")
+    public ResponseEntity<ApiResponseComment<CommentDTO>> createComment(
+            @PathVariable("boardno") int boardno,
+            @Valid @RequestBody CommentRequestDTO request,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            // 세션에서 사용자 정보 추출 (실제 구현에 맞게 수정);
+            String userId = getCurrentUserId(httpRequest);
+            
+            System.out.println("컨트롤러에 도달 -------"  + userId);
+            
+            
+            
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+            }
+            
+            CommentDTO comment = commService.createComment(boardno, request, userId);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 작성 성공", comment));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponseComment.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 작성 중 오류가 발생했습니다."));
+        }
+    }
+    
+    
+    //댓글 수정
+    @PutMapping("/board/comments/{commentId}")
+    public ResponseEntity<ApiResponseComment<CommentDTO>> updateComment(
+            @PathVariable("commentId") int commentId,
+            @Valid @RequestBody CommentRequestDTO request,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            String userId = getCurrentUserId(httpRequest);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+            }
+            
+            CommentDTO comment = commService.updateComment(commentId, request, userId);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 수정 성공", comment));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponseComment.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 수정 중 오류가 발생했습니다."));
+        }
+    }
+    
+    private String getCurrentUserId(HttpServletRequest request) {
+        // 세션에서 사용자 ID 추출
+        Object userId = request.getSession().getAttribute("login");
+        return userId != null ? userId.toString() : null;
     }
 }

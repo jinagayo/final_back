@@ -73,6 +73,7 @@ public class BoardService {
         // 조회수 초기화
         boardDTO.setHits(0);
         
+        
         BoardEntity entity = new BoardEntity(boardDTO);
         BoardEntity savedEntity = boardRepository.save(entity);
         return entityToDto(savedEntity);
