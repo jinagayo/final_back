@@ -17,7 +17,7 @@ public class MeterialDTO {
 	private String content;//내용
 	private String type;//종류(영상,과제)
 	private String title;
-	private int time;//동영상길이
+	private long time;//동영상길이
 	private String detail;
 	
 	public static MeterialDTO fromEntity(MeterialEntity entity) {

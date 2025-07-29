@@ -1,5 +1,6 @@
 package com.spark.controller;
 
+import java.io.File;
 import java.net.URL;
 import java.security.Principal;
 import java.sql.Date;
@@ -66,18 +67,23 @@ public class VideoController {
 
 	@PostMapping("/save")
 	public ResponseEntity<?> saveVideoMeterial(@RequestBody VideoUploadRequest request){
-		MeterialEntity video = new MeterialEntity();
-		 int nextSeq = meterialRepository.findNextSeqByClassId(request.getClassId()) + 1;
+		 try {
+	            MeterialEntity video = new MeterialEntity();
+	            video.setClassId(request.getClassId());
+	            video.setTitle(request.getTitle());
+	            video.setDetail(request.getDetail());
+	            video.setContent(request.getKey());
+	            video.setTime(request.getDuration());
+	            video.setType("MET001"); // 고정: video
 
-		video.setTitle(request.getTitle());
-		video.setContent(request.getKey());
-		video.setClassId(request.getClassId());
-		video.setDetail(request.getDetail());
-		video.setType("MET001");
-		video.setSeq(nextSeq);
-		
-		meterialRepository.save(video);
-		return ResponseEntity.ok("저장완료");
+	            meterialRepository.save(video);
+
+	            return ResponseEntity.ok().body("✅ 영상 저장 완료");
+	        } catch (Exception e) {
+	            return ResponseEntity
+	                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                    .body("❌ 저장 실패: " + e.getMessage());
+	        }
 	}
 	
 	@GetMapping("/material/{id}")

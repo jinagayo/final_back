@@ -60,7 +60,6 @@ public class ClassService {
     	
     	//4. DTO(응답 객체) 생성 및 값 세팅
     	ClassDTO dto = new ClassDTO();
-    	dto.setClassId(classEntity.getClassId());
     	dto.setTeachId(classEntity.getTeachId());
     	dto.setDetail(classEntity.getDetail());
     	dto.setSubId(classEntity.getSubId());
