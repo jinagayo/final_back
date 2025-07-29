@@ -38,7 +38,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-    
+     
     // Security Filter Chain
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -49,7 +49,10 @@ public class SecurityConfig {
                 .requestMatchers("/join/**").permitAll()        // 기존 join 경로 허용
                 .requestMatchers("/auth/**").permitAll()    // 회원가입, 로그인 API 허용
                 .requestMatchers("/api/admin/**").permitAll()
-                .requestMatchers("/board/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/board/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/board/**").permitAll() 
+                .requestMatchers(HttpMethod.PUT, "/board/**").permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/board/**").permitAll()
                 .requestMatchers("/", "/home", "/login").permitAll() // 기본 페이지들 허용
                 .requestMatchers(HttpMethod.OPTIONS, "/course/**", "/course/**/**").permitAll() // OPTIONS 메서드 허용
                 
