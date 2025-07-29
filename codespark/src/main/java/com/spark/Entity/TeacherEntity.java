@@ -28,8 +28,8 @@ public class TeacherEntity {
 	private String introduce; // 자기소개
 	
 	public TeacherEntity(TeacherDTO dto) {
-		this.teachId = dto.getTeach_id();
-		this.subId = dto.getSub_id();
+		this.teachId = dto.getTeachId();
+		this.subId = dto.getSubId();
 		this.career = dto.getCareer();
 		this.introduce = dto.getIntroduce();
 	}
