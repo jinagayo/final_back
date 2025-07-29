@@ -99,6 +99,20 @@
         <artifactId>commons-io</artifactId>
         <version>2.11.0</version>
     </dependency>
+    
+    <dependency>
+    <groupId>com.amazonaws</groupId>
+    <artifactId>aws-java-sdk-s3</artifactId>
+    <version>1.12.620</version>
+    </dependency>
+    
+    <!-- FFmpeg은 Java에서 외부 프로세스로 실행합니다 -->
+<dependency>
+    <groupId>ws.schild</groupId>
+    <artifactId>jave-core</artifactId>
+    <version>3.3.1</version> <!-- 또는 최신 버전 -->
+</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

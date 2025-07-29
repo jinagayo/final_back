@@ -64,6 +64,8 @@ public class SecurityConfig {
 
                 //  동영상 업로드는 강사만
                 .requestMatchers("/video/upload").hasRole("INSTRUCTOR")
+                
+                .requestMatchers("/video/stream").permitAll()
 
                 //  영상 전체 접근은 로그인 필요
                 .requestMatchers("/video/**").authenticated()
