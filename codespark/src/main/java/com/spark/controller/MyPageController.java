@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -17,17 +18,22 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.UserEntity;
+import com.spark.dto.ProfileUpdateDTO;
 import com.spark.dto.SocialPaymentDTO;
 import com.spark.dto.StudentDTO;
 import com.spark.dto.TeacherDTO;
+import com.spark.dto.UserDTO;
 import com.spark.Entity.StudentEntity;
 import com.spark.Entity.TeacherEntity;
 import com.spark.service.CourseService;
 import com.spark.service.UserService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/Mypage/")
@@ -116,5 +122,30 @@ public class MyPageController {
 		return ResponseEntity.ok(response);
     		
     }
+    @PostMapping("ProfileUpdate")
+    public ResponseEntity<?> updateProfile(HttpSession session,
+    		@RequestBody ProfileUpdateDTO dto
+    	) {
+    	System.out.println("ProfileUpdate 컨트롤러 작동중");
+    	String id = (String)session.getAttribute("login");
+    	dto.setUser_id(id);
+    	UserEntity entity = userService.UserProfile(id);
+    	System.out.println(dto);
+
+        if (dto.getPw() != null) entity.setPw(dto.getPw());
+        if (dto.getName() != null) entity.setName(dto.getName());
+        if (dto.getAddress1() != null) entity.setAddress1(dto.getAddress1());
+        if (dto.getAddress2() != null) entity.setAddress2(dto.getAddress2());
+        if (dto.getAddressnum() != null) entity.setAddressnum(dto.getAddressnum());
+        if (dto.getBirthday() != null) entity.setBirthday(dto.getBirthday());
+        if (dto.getPhone() != null) entity.setPhone(dto.getPhone());
+        if (dto.getEmail() != null) entity.setEmail(dto.getEmail());
+        if (dto.getImg() != null) entity.setImg(dto.getImg());
+        if (dto.getPosition() != null) entity.setPosition(dto.getPosition());
+        if (dto.getState() != null) entity.setState(dto.getState());
     	
+    	UserEntity data = userService.UserUpdate(entity);
+    	return ResponseEntity.ok(data);
+    	
+    }
 }
