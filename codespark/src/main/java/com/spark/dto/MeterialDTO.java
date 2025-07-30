@@ -20,13 +20,13 @@ public class MeterialDTO {
 	private String content;//내용
 	private String type;//종류(영상,과제)\
 	private String title;
-	private long time;//동영상길이
+	private Integer time;//동영상길이
 	private String detail;
 	
 	public static MeterialDTO fromEntity(MeterialEntity entity) {
 		MeterialDTO dto = new MeterialDTO();
-		dto.setClass_id(entity.getClassId());
-		dto.setMeter_id(entity.getMeterId());
+		dto.setClassId(entity.getClassId());
+		dto.setMeterId(entity.getMeterId());
 		dto.setSeq(entity.getSeq());
 		dto.setContent(entity.getContent());
 		dto.setType(entity.getType());
@@ -38,7 +38,7 @@ public class MeterialDTO {
 	}
 
 	public MeterialDTO(int meter_id2, String content2) {
-		meter_id = meter_id2;
+		meterId = meter_id2;
 		content = content2;
 	}
 

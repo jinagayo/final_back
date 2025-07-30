@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.MeterialDTO;
+import com.spark.dto.SubjectReviewDTO;
 import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.SubjectReviewEntity;
 import com.spark.repository.AttendanceRepository;
@@ -37,13 +38,12 @@ import com.spark.repository.MeterialRepository;
 import com.spark.repository.QnaRepository;
 import com.spark.repository.UserRepository;
 
-import jakarta.transaction.Transactional;
 
 @Service
 @Transactional
 public class ClassService {
     @Autowired
-    private SubjectReviewRepository subjectReviewRepository;
+    private SubjectReviewRepository subjectReviewRepo;
     @Autowired
     private CourseRepository courseRepo;
     @Autowired
@@ -77,8 +77,9 @@ public class ClassService {
 		return attRepo.findAttId(id,classId);
 	}
 	public Boolean reviewYN(Integer attId) {
-		List<SubjectReviewEntity> entity = subjectReviewRepository.findByAttId(attId);
-		if(entity==null) {
+		List<SubjectReviewEntity> entity = subjectReviewRepo.findByAttId(attId);
+		System.out.println("================================\n"+entity);
+		if(entity.isEmpty()) {
 			return false;
 		}
 		return true;
@@ -141,6 +142,13 @@ public class ClassService {
 		return meterials.stream()
 				.map(MeterialDTO::fromEntity)
 				.toList();
+	}
+
+
+	public void saveReview(SubjectReviewDTO dto) {
+		SubjectReviewEntity entity = new SubjectReviewEntity(dto);
+		subjectReviewRepo.save(entity);
+		
 	}
 
 
