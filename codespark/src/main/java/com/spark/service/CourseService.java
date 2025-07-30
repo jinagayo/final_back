@@ -117,6 +117,15 @@ public class CourseService {
 		
 	}
 
+	   public List<ClassInfoDTO> getMain() {
+		      List<ClassInfoDTO> allClass=courseRepo.findAllClass();
+		      List<ClassInfoDTO> list = new ArrayList<>();
+		      for(int i=0;i<8;i++) {
+		         list.add(allClass.get(i));
+		      }
+		      return list;
+		   }
+
 
 
 
