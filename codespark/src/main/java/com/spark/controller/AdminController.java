@@ -1,8 +1,10 @@
 package com.spark.controller;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -24,12 +26,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spark.Entity.CommonEntity;
 import com.spark.Entity.UserEntity;
 import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
+import com.spark.repository.CommonRepository;
 import com.spark.repository.CourseRepository;
 import com.spark.repository.UserRepository;
 import com.spark.service.CourseService;
+import com.spark.service.S3Service;
 import com.spark.dto.CodingDTO;
 import com.spark.service.CodingService;
 import com.spark.service.UserService;
@@ -51,8 +56,14 @@ public class AdminController {
 	@Autowired
 	private CourseService courseservice;
 
-  @Autowired
+	@Autowired
 	private CodingService coService;
+  
+	@Autowired
+	private S3Service s3Service;
+	
+	@Autowired
+	private CommonRepository commonRepository;
 
 	
 	// 승인 대기중인 강사 목록조회
@@ -213,37 +224,44 @@ public class AdminController {
                 return ResponseEntity.badRequest().body(response);
             }
             
-            // 파일 저장 경로 설정
-            String uploadDir = "D:/codesparkReact/final_front/public/img/";
-            File directory = new File(uploadDir);
-            if (!directory.exists()) {
-                directory.mkdirs();
-            }
+            //s3에 업로드
+            String s3Key = s3Service.upload(file, "banner");
+            String imageUrl =  "https://my-lecture-video.s3.ap-northeast-2.amazonaws.com/" + s3Key;
             
-            // 기존 main.png 백업 (선택사항)
-            File existingFile = new File(uploadDir + "main.png");
-            if (existingFile.exists()) {
-                File backupFile = new File(uploadDir + "main_backup_" + System.currentTimeMillis() + ".png");
-                existingFile.renameTo(backupFile);
-            }
+            // DB에 저장 (기존 BANNER_MAIN 있는 경우 업데이트, 없으면 insert)
+            Optional<CommonEntity> banner = commonRepository.findById("BANNER_MAIN");
             
-            // 새 파일 저장
-            File newFile = new File(uploadDir + "main.png");
-            file.transferTo(newFile);
+            CommonEntity entity = banner.orElseGet(()->{
+            	CommonEntity newEntity = new CommonEntity();
+            	newEntity.setComId("BANNER_MAIN");
+            	return newEntity;
+            });
             
-            response.put("success", true);
-            response.put("message", "배너 이미지가 성공적으로 업로드되었습니다.");
-            response.put("imagePath", "/img/main.png");
+            entity.setName(imageUrl);   //S3 URL 저장
+            commonRepository.save(entity);
             
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "imageUrl", imageUrl
+                ));
             
         } catch (Exception e) {
-            e.printStackTrace();
-            response.put("success", false);
-            response.put("message", "파일 업로드 중 오류가 발생했습니다.");
-            return ResponseEntity.status(500).body(response);
+        	 e.printStackTrace();
+             return ResponseEntity.status(500).body(Map.of("success", false, "message", "업로드 실패"));
         }
     }
+    
+    @GetMapping("/banner/latest")
+    public ResponseEntity<?> getLatestBannerImage(){
+    	  Optional<CommonEntity> banner = commonRepository.findById("BANNER_MAIN");
+    	
+
+    	    String url = banner.map(CommonEntity::getName)
+    	                       .orElse("/img/main.png");
+
+    	    return ResponseEntity.ok(Map.of("url", url));
+    	}
+    
     	
     
  // 강사 목록 조회

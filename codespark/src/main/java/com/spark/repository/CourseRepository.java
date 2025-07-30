@@ -2,6 +2,7 @@ package com.spark.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -50,6 +51,11 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
 
 	@Query(value = "SELECT * FROM subject_review  WHERE class_id = :classId",nativeQuery = true)
 	List<SubjectReviewEntity> findReview(@Param("classId") String classId);
+
+
+	Optional<ClassEntity> findByClassId(Integer classId);
+
+	Page<ClassEntity> findByTeachId(String classId, Pageable pageable);	
 
 	//관리자 입장에서 강의 목록 조회
 	@Query(value = "SELECT c.class_id as classId, c.name as name, c.detail as detail, c.price as price, c.intro as intro, c.mark as mark, c.img as img, u.name as teacher, "
