@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,8 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.UserEntity;
-import com.spark.dto.CodingDTO;
+import com.spark.dto.ClassDTO;
+import com.spark.dto.ClassInfoDTO;
+import com.spark.repository.CourseRepository;
 import com.spark.repository.UserRepository;
+import com.spark.service.CourseService;
+import com.spark.dto.CodingDTO;
 import com.spark.service.CodingService;
 import com.spark.service.UserService;
 
@@ -44,7 +49,11 @@ public class AdminController {
 	private UserService userService;
 	
 	@Autowired
+	private CourseService courseservice;
+
+  @Autowired
 	private CodingService coService;
+
 	
 	// 승인 대기중인 강사 목록조회
 	@GetMapping("/pending-teachers")
@@ -350,4 +359,45 @@ public class AdminController {
         return "3".equals(userPosition);
     }
 
+
+    // 강의 리스트 조회
+    @GetMapping("/class/ClassList")
+    public ResponseEntity<?> rejectTeacher() {
+    	System.out.println("ClassList 컨트롤러 작동");
+    	List<ClassInfoDTO> data = courseservice.findAllRequest();
+    	for(ClassInfoDTO d : data) System.out.println(d);
+        return ResponseEntity.ok().body(data);
+    
+    }
+    //강의 요청 수락/거절
+    @PostMapping("/class/Request/{classId}/{action}")
+    public ResponseEntity<?> Request(@PathVariable(name="classId") String classId,@PathVariable(name="action") String action,HttpSession session ) {
+    	System.out.println("Request 컨트롤러 작동");
+    	String id = (String)session.getAttribute("login");
+    	courseservice.requestSolve(id,classId,action);
+    	
+    	
+        return ResponseEntity.ok("");
+    	
+    
+    }
+
+    // 강의 세부정보 조회
+    @GetMapping("/class/Detail/{classId}")
+    public ResponseEntity<?> ClassDetail(@PathVariable(name="classId") String classId) {
+    	System.out.println("ClassDetail 컨트롤러 작동");
+    	List<Map<String, Object>>  data = courseservice.findClass(classId);
+    	for(Map<String, Object> l :data) System.err.println(l);
+        return ResponseEntity.ok().body(data);
+    
+    }
+    // 강의 삭제
+    @DeleteMapping("/class/Delete/{classId}")
+    public ResponseEntity<?> ClassDelete(@PathVariable(name="classId") String classId) {
+    	System.out.println("Delete 컨트롤러 작동");
+    	courseservice.deleteClass(classId);
+        return ResponseEntity.ok("");
+    
+    }
+    
 }

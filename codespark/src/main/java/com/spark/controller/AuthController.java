@@ -22,6 +22,7 @@ import com.spark.dto.UserDTO;
 import com.spark.service.AuthService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
 
 //login,logout 관련 컨트롤러
 @RestController
@@ -38,14 +39,15 @@ public class AuthController {
     }
 	
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDTO login,HttpSession session) {
+    public ResponseEntity<?> login(@RequestBody UserDTO login,
+    				HttpServletRequest request, HttpSession session) {
         try {
             System.out.println("=== 로그인 요청 ===");
             System.out.println("아이디: " + login.getUser_id());
             System.out.println("비밀번호: " + (login.getPw() != null ? "***있음***" : "NULL"));
             
             // 로그인 처리
-            ResponseEntity<?> loginResult = authService.authenticateUser(login);
+            ResponseEntity<?> loginResult = authService.authenticateUser(login,request);
             
             //로그인 성공 시 세션 저장
             //응답코드가 200번대 인지 확인

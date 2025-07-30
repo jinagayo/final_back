@@ -31,8 +31,8 @@ public class StudentEntity {
 	@Column(name = "license")
 	private String license;//자격증
 	
-	@Column(name = "lauguage")
-	private String lauguage; // 어학사전
+	@Column(name = "language")
+	private String language; // 어학사전
 	
 	@Column(name = "advice")
 	private String advice; // 취업상담
@@ -43,7 +43,7 @@ public class StudentEntity {
 		this.award = dto.getAward();
 		this.skill = dto.getSkill();
 		this.license = dto.getLicense();
-		this.lauguage = dto.getLauguage();
+		this.language = dto.getLanguage();
 		this.advice = dto.getAdvice();
 	}
 }

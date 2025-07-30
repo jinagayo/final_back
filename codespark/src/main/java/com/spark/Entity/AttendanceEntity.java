@@ -3,6 +3,8 @@ import com.spark.dto.AttendanceDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -15,7 +17,8 @@ import lombok.NoArgsConstructor;
 public class AttendanceEntity {
     @Id
     @Column(name = "att_id") // DB 컬럼명 명시
-    private String attId;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int attId;
     
     @Column(name = "class_id")
     private String classId; 
@@ -31,14 +34,14 @@ public class AttendanceEntity {
 
     
     @Column(name = "payment_id")
-    private String paymentId; // 카멜케이스로 변경
+    private Integer paymentId; // 카멜케이스로 변경
     
     public AttendanceEntity(AttendanceDTO dto) {
-        this.attId = dto.getAtt_id();
-        this.classId = dto.getClass_id();
-        this.stuId = dto.getStu_id();
+        this.attId = dto.getAttId();
+        this.classId = dto.getClassId();
+        this.stuId = dto.getStuId();
         this.price = dto.getPrice();
         this.state = dto.getState();
-        this.paymentId = dto.getPayment_id();
+        this.paymentId = dto.getPaymentId();
     }
 }
