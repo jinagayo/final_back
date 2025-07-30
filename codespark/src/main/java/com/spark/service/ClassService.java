@@ -69,12 +69,12 @@ public class ClassService {
 		ClassInfoDTO data = courseRepo.findClassInfo(class_id);
 		return data;
 	}
-	public List<MeterialEntity> getMeterials(String classId) {
+	public List<MeterialEntity> getMeterials(Integer classId) {
 		List<MeterialEntity> data = meterialRepo.findByClassId(classId);
 		return data;
 	}
-	public Integer getAttId(String id, String classId) {
-		return attRepo.findAttId(id,classId);
+	public Integer getAttId(String stuId, String classId) {
+		return attRepo.findAttId(stuId,classId);
 	}
 	public Boolean reviewYN(Integer attId) {
 		List<SubjectReviewEntity> entity = subjectReviewRepo.findByAttId(attId);
@@ -128,14 +128,13 @@ public class ClassService {
 	    // **이 map 내부에서 직접 set 해줘야 함**
 	    return result.map(entity -> {
 	        ClassDTO dto = ClassDTO.fromEntity(entity);
-	 
 	        dto.setLectureCount(lectureRepo.countByClassId(entity.getClassId()));
 	        dto.setQnaCount(qnaRepo.countByClassId(entity.getClassId()));
 	        return dto;
 	    });
 	}
 
-	public List<MeterialDTO> getLectures(String classId) {
+	public List<MeterialDTO> getLectures(Integer classId) {
 		// 엔티티로 바로 받는 경우
 		List<MeterialEntity> meterials = meterialRepo.findByClassIdAndType(classId, "MET001");
 		// Entity -> DTO 변환

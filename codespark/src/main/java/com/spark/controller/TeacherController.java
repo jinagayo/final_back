@@ -68,17 +68,17 @@ public class TeacherController {
 	
 	@GetMapping("/class/{classId}")
 	public ResponseEntity<?> getClassDetail(@PathVariable String classId){
-		 System.out.println("=== [API] classId: " + classId); // 이거 무조건 찍기!
+		 System.out.println("=== [API] classId: " + classId); 
 		 	int id = Integer.parseInt(classId);  // 수동 파싱
 		    ClassDTO dto = classService.getClassDetail(id);
-		    System.out.println("=== [API] classDTO.name: " + dto.getName());
+		    System.out.println("=== [API] classDTO.Detail: " + dto.getDetail());
 		    return ResponseEntity.ok().body(Map.of("data",dto));
 	}
 	
 	//클래스 강좌 목록
 	@GetMapping("class/{classId}/lectures")
 	public ResponseEntity<?> getLectures(@PathVariable String classId){
-		List<MeterialDTO> lectures = classService.getLectures(classId);
+		List<MeterialDTO> lectures = classService.getLectures(Integer.parseInt(classId));
 		return ResponseEntity.ok().body(Map.of("data",lectures));
 	}
 }

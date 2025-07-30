@@ -47,8 +47,9 @@ public class ClassController {
         //수업 정보
         ClassInfoDTO classDto = classService.getClass(classId);
         //수업자료
-        List<MeterialEntity> meterial = classService.getMeterials(classId);
-//        for(MeterialEntity m : meterial)System.out.println(m);
+        List<MeterialEntity> meterial = classService.getMeterials(Integer.parseInt(classId));
+        for(MeterialEntity m : meterial)System.out.println(m);
+
         //리뷰
         Integer attId = classService.getAttId(id,classId);
         Boolean review = classService.reviewYN(attId);
