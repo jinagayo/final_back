@@ -164,33 +164,33 @@ public class VideoController {
 	}
 	
 	
-	// /api/progress/class/{classId}/student/{studentId}
-	@GetMapping("/progress/class/{classId}/student/{studentId}")
+	@GetMapping("/video/progress/class/{classId}/student/{studentId}")
 	public ResponseEntity<?> getStudentProgress(
-	        @PathVariable int classId,
-	        @PathVariable String studentId) {
+	    @PathVariable int classId,
+	    @PathVariable String studentId) {
+	    
 	    List<MeterialSubEntity> progresses = materialSubRepository.findByStdIdAndClassId(studentId, classId);
-	    // 예: [{meterialId: 3, progress: 100}, ...]
+
 	    long completed = progresses.stream().filter(p -> p.getProgress() >= 100).count();
 	    int total = progresses.size();
+
 	    Map<String, Object> res = new HashMap<>();
 	    res.put("completed", completed);
 	    res.put("total", total);
-	    res.put("progresses", progresses); // 필요시
 	    return ResponseEntity.ok(res);
 	}
 	
 	@PostMapping("/progress/complete")
-	public ResponseEntity<?> markLectureAsCompleted(@RequestBody Map<String, Object> req) {
-	    String stdId = (String) req.get("userId");
-	    Integer meterId = Integer.parseInt(req.get("meterId").toString());
-	    // 진도 값을 100(완료)으로 업데이트
-	    MeterialSubEntity sub = materialSubRepository.findByMeterialIdAndStdId(meterId, stdId);
-	    if (sub != null && sub.getProgress() < 100) {
-	        sub.setProgress(100);
-	        materialSubRepository.save(sub);
-	        return ResponseEntity.ok("completed");
-	    }
-	    return ResponseEntity.badRequest().body("not found or already completed");
-	}
-	}
+	public ResponseEntity<?> markLectureAsCompleted(@RequestBody MeterialSubEntity req) {
+		System.out.println("req:" + req);
+		 MeterialSubEntity sub = materialSubRepository.findByMeterialIdAndStdId(req.getMeterialId(), req.getStdId());
+		    
+		    if (sub == null) {
+		        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 진도 데이터가 없습니다.");
+		    }
+
+		    sub.setProgress(100);  // 100% 완료로 저장
+		    materialSubRepository.save(sub);
+
+		    return ResponseEntity.ok("진도 완료");
+	}}

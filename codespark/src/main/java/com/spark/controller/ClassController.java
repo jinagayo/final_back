@@ -49,10 +49,11 @@ public class ClassController {
         //수업자료
         List<MeterialEntity> meterial = classService.getMeterials(Integer.parseInt(classId));
         for(MeterialEntity m : meterial)System.out.println(m);
+
         //리뷰
         Integer attId = classService.getAttId(id,classId);
         Boolean review = classService.reviewYN(attId);
-        
+        System.out.println(review);
         
         Map<String, Object> map = new HashMap<>();
         map.put("class", classDto);
@@ -67,7 +68,10 @@ public class ClassController {
     @PostMapping("review")
     public ResponseEntity<?> review(HttpSession session,@RequestBody SubjectReviewDTO dto) {
     	System.out.println("review 작동중");
+        String id = (String)session.getAttribute("login");
+        dto.setAttId(classService.getAttId(id,dto.getClass_id()));
     	System.out.println(dto);
+    	classService.saveReview(dto);
     	
         return ResponseEntity.ok().body("");
     }

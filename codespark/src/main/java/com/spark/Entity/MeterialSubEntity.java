@@ -28,7 +28,7 @@ public class MeterialSubEntity {
 	private String content;//과제물/메모
 	
 	@Column(name = "progress")
-	private int progress;//진행률
+	private double progress;//진행률
 	
 	@Column(name = "std_id")
 	private String stdId;
