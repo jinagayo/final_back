@@ -4,10 +4,13 @@ import java.io.File;
 import java.net.URL;
 import java.security.Principal;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +26,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spark.Entity.MeterialEntity;
+import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.UserEntity;
 import com.spark.dto.MeterialDTO;
+import com.spark.dto.StudentDTO;
 import com.spark.dto.VideoUploadRequest;
+import com.spark.repository.AttendanceRepository;
 import com.spark.repository.MeterialRepository;
+import com.spark.repository.MeterialSubRepository;
 import com.spark.repository.UserRepository;
 import com.spark.repository.VideoRepository;
 import com.spark.service.S3Service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 import com.amazonaws.AmazonServiceException;
@@ -45,7 +53,12 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 public class VideoController {
     private final AmazonS3 amazonS3;
 	private final S3Service s3Service;
+	@Autowired
 	private final MeterialRepository meterialRepository;
+	@Autowired
+	private final AttendanceRepository attRepository;
+	@Autowired
+	private final MeterialSubRepository materialSubRepository;
 	
 	// 강사(2)만 업로드 가능
 	@PostMapping("/upload")
@@ -69,32 +82,62 @@ public class VideoController {
 	public ResponseEntity<?> saveVideoMeterial(@RequestBody VideoUploadRequest request){
 		 try {
 	            MeterialEntity video = new MeterialEntity();
-	            video.setClassId(request.getClassId());
+	            video.setClassId(Integer.parseInt(request.getClassId()));
 	            video.setTitle(request.getTitle());
 	            video.setDetail(request.getDetail());
 	            video.setContent(request.getKey());
 	            video.setTime(request.getDuration());
 	            video.setType("MET001"); // 고정: video
-
+	            int nextSeq = meterialRepository.findMaxSeqByClassId(Integer.parseInt(request.getClassId())) + 1;
+	            video.setSeq(nextSeq);   // ✅ 자동으로 순번 설정
 	            meterialRepository.save(video);
+	            
+	         // 1. 출석(수강신청) 테이블에서 수강 중인 학생 ID 목록 조회
+	            List<String> studentIds = attRepository.findStudentIdsByClassId(video.getClassId());
+	            
+	         // 2. 진도 테이블에 각 학생마다 초기 진도 0으로 등록
+	            List<MeterialSubEntity> progresses = new ArrayList<>();
+	            
+	            for (String stuId : studentIds) {
+	                MeterialSubEntity sub = new MeterialSubEntity();
+	                sub.setMeterialId(video.getMeterId());
+	                sub.setStdId(stuId);
+	                sub.setProgress(0);
+	                progresses.add(sub);
+	            }
 
-	            return ResponseEntity.ok().body("✅ 영상 저장 완료");
+	            materialSubRepository.saveAll(progresses);
+	            return ResponseEntity.ok().body(Map.of(
+	            	    "message", "✅ 영상 및 진도 저장 완료",
+	            	    "meterialId", video.getMeterId()
+	            	));
+
 	        } catch (Exception e) {
 	            return ResponseEntity
 	                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
 	                    .body("❌ 저장 실패: " + e.getMessage());
 	        }
+		 
+		 
+		 
 	}
 	
 	@GetMapping("/material/{id}")
-	public ResponseEntity<?> getMaterialById(@PathVariable String id){
-		int meterId = Integer.parseInt(id); 
-		 MeterialEntity meterial = meterialRepository.findByMeterId(meterId); // 이게 null이라면
+	public ResponseEntity<?> getMaterialById(@PathVariable int id){
+		System.out.println("🔍 요청 받은 meterId: " + id);
+		MeterialEntity meterial = meterialRepository.findByMeterId(id);
+		System.out.println("🔍 조회 결과 meterial: " + meterial);
+
 		 
 		 if (meterial == null) {
 		        return ResponseEntity.status(404).body("해당 자료를 찾을 수 없습니다.");
 		    }
-		    return ResponseEntity.ok(new MeterialDTO(meterial.getMeterId(), meterial.getContent()));
+		 MeterialDTO m = new MeterialDTO(); 
+		 m.setClass_id(meterial.getClassId());
+		 m.setMeter_id(meterial.getMeterId());
+		 m.setContent(meterial.getContent());
+		 m.setDetail(meterial.getDetail());
+		 return ResponseEntity.ok(m);
 		    
 		}
 	
@@ -118,5 +161,36 @@ public class VideoController {
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 					.body("S3 URL 생성 중 오류 발생: " + e.getMessage());
 		}
+	}
+	
+	
+	// /api/progress/class/{classId}/student/{studentId}
+	@GetMapping("/progress/class/{classId}/student/{studentId}")
+	public ResponseEntity<?> getStudentProgress(
+	        @PathVariable int classId,
+	        @PathVariable String studentId) {
+	    List<MeterialSubEntity> progresses = materialSubRepository.findByStdIdAndClassId(studentId, classId);
+	    // 예: [{meterialId: 3, progress: 100}, ...]
+	    long completed = progresses.stream().filter(p -> p.getProgress() >= 100).count();
+	    int total = progresses.size();
+	    Map<String, Object> res = new HashMap<>();
+	    res.put("completed", completed);
+	    res.put("total", total);
+	    res.put("progresses", progresses); // 필요시
+	    return ResponseEntity.ok(res);
+	}
+	
+	@PostMapping("/progress/complete")
+	public ResponseEntity<?> markLectureAsCompleted(@RequestBody Map<String, Object> req) {
+	    String stdId = (String) req.get("userId");
+	    Integer meterId = Integer.parseInt(req.get("meterId").toString());
+	    // 진도 값을 100(완료)으로 업데이트
+	    MeterialSubEntity sub = materialSubRepository.findByMeterialIdAndStdId(meterId, stdId);
+	    if (sub != null && sub.getProgress() < 100) {
+	        sub.setProgress(100);
+	        materialSubRepository.save(sub);
+	        return ResponseEntity.ok("completed");
+	    }
+	    return ResponseEntity.badRequest().body("not found or already completed");
 	}
 	}

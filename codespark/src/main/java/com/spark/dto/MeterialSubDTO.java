@@ -12,4 +12,5 @@ public class MeterialSubDTO {
 	private int meterial_id;//자료번호
 	private String content;//과제물/메모
 	private int progress;//진행률
+	private String stdId;
 }

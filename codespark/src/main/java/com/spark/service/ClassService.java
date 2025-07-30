@@ -87,14 +87,13 @@ public class ClassService {
 	    // **이 map 내부에서 직접 set 해줘야 함**
 	    return result.map(entity -> {
 	        ClassDTO dto = ClassDTO.fromEntity(entity);
-	 
 	        dto.setLectureCount(lectureRepo.countByClassId(entity.getClassId()));
 	        dto.setQnaCount(qnaRepo.countByClassId(entity.getClassId()));
 	        return dto;
 	    });
 	}
 
-	public List<MeterialDTO> getLectures(String classId) {
+	public List<MeterialDTO> getLectures(Integer classId) {
 		// 엔티티로 바로 받는 경우
 		List<MeterialEntity> meterials = meterialRepo.findByClassIdAndType(classId, "MET001");
 		// Entity -> DTO 변환

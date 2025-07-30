@@ -4,6 +4,8 @@ import com.spark.dto.MeterialSubDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -16,6 +18,7 @@ import lombok.NoArgsConstructor;
 public class MeterialSubEntity {
 	@Id
 	@Column(name = "metersub_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int metersubId;//자료수행id
 	
 	@Column(name = "meterial_id")
@@ -27,10 +30,14 @@ public class MeterialSubEntity {
 	@Column(name = "progress")
 	private int progress;//진행률
 	
+	@Column(name = "std_id")
+	private String stdId;
+	
 	public MeterialSubEntity(MeterialSubDTO dto) {
 		this.metersubId = dto.getMetersub_id();
 		this.meterialId = dto.getMeterial_id();
 		this.content = dto.getContent();
 		this.progress = dto.getProgress();
+		this.stdId = dto.getStdId();
 	}
 }
