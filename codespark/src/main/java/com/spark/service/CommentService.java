@@ -16,6 +16,7 @@ import com.spark.repository.CommentRepository;
 import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class CommentService {
 	
 	@Autowired
@@ -94,15 +95,63 @@ public class CommentService {
     
     //댓글 수정
     public CommentDTO updateComment(int commentId, CommentRequestDTO request, String userId) {
-        CommentEntity comment = commRepo.findActiveCommentByIdAndUser(commentId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없거나 수정 권한이 없습니다."));
-        
-        comment.setContent(request.getContent());
-        comment.setUpdateAt(new Date());
-        comment.setUpdateBy(userId);
-        
-        CommentEntity updatedComment = commRepo.save(comment);
-        return CommentDTO.fromEntity(updatedComment);
+        try {
+            Date now = new Date();
+            
+            int updatedRows = commRepo.updateCommentContent(
+                commentId, 
+                request.getContent(), 
+                now, 
+                userId, 
+                userId
+            );
+            
+            if (updatedRows == 0) {
+                throw new IllegalArgumentException("댓글을 찾을 수 없거나 수정 권한이 없습니다.");
+            }
+            CommentEntity updatedComment = commRepo.findById(commentId)
+                    .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+            
+            CommentDTO result = CommentDTO.fromEntity(updatedComment);
+            
+            return result;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     
+    //댓글 삭제
+    public void deleteComment(int commentId, String userId) {
+        CommentEntity comment = commRepo.findActiveCommentByIdAndUser(commentId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없거나 삭제 권한이 없습니다."));
+        
+        Date now = new Date();
+        if (comment.getReno() == 0) {
+            List<CommentEntity> replies = commRepo.findRepliesByParentId(commentId);
+            if (!replies.isEmpty()) {
+                int updatedRows = commRepo.updateCommentToDeleted(
+                    commentId, 
+                    "삭제된 댓글입니다.", 
+                    now, 
+                    userId, 
+                    userId
+                );
+                
+                if (updatedRows > 0) {
+                    System.out.println("댓글 내용 변경 완료 - commentId: {}"+commentId);
+                } else {
+                    throw new IllegalArgumentException("댓글 삭제에 실패했습니다.");
+                }
+                return;
+            }
+        }
+        
+        int deletedRows = commRepo.deleteCommentLogically(commentId, now, userId, userId);
+        
+        if (deletedRows == 0) {
+            throw new IllegalArgumentException("댓글 삭제에 실패했습니다.");
+        }
+    }
 }

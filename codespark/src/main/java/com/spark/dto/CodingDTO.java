@@ -26,4 +26,11 @@ public class CodingDTO {
 	private LocalDateTime update_at;//수정시간
 	private String update_by;//수정인
 	private int is_active;//로그용
+	
+    // 프론트엔드에서 사용하는 추가 필드들
+    private double correctRate;    // 정답률
+    private int submissions;       // 제출 수
+    private boolean isSolved;      // 해결 여부
+    private String author;         // 작성자 (create_by와 동일)
+
 }
