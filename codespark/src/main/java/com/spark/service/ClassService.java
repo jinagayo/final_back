@@ -4,6 +4,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.spark.dto.ClassInfoDTO;
+import com.spark.dto.MeterialDTO;
+import com.spark.Entity.MeterialEntity;
+import com.spark.Entity.SubjectReviewEntity;
+import com.spark.repository.AttendanceRepository;
+import com.spark.repository.BoardRepository;
+import com.spark.repository.CourseRepository;
+import com.spark.repository.MeterialRepository;
+import com.spark.repository.SubjectReviewRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,7 +42,8 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class ClassService {
-
+    @Autowired
+    private SubjectReviewRepository subjectReviewRepository;
     @Autowired
     private CourseRepository courseRepo;
     @Autowired
@@ -40,11 +54,37 @@ public class ClassService {
     private MeterialRepository meterialRepo;
     @Autowired
     private AttRepository attRepo;
-
+    
     ClassService(CourseRepository courseRepo) {
         this.courseRepo = courseRepo;
     }
     
+
+	public List<Map<String, Object>> getAllClass(String id) {
+		List<Map<String, Object>> data = courseRepo.getMyClass(id);
+		System.out.println("서비스 동작" +data);
+		return data;
+	}
+	public ClassInfoDTO getClass(String class_id) {
+		ClassInfoDTO data = courseRepo.findClassInfo(class_id);
+		return data;
+	}
+	public List<MeterialEntity> getMeterials(String classId) {
+		List<MeterialEntity> data = meterialRepo.findByClassId(classId);
+		return data;
+	}
+	public Integer getAttId(String id, String classId) {
+		return attRepo.findAttId(id,classId);
+	}
+	public Boolean reviewYN(Integer attId) {
+		List<SubjectReviewEntity> entity = subjectReviewRepository.findByAttId(attId);
+		if(entity==null) {
+			return false;
+		}
+		return true;
+	}
+
+
     public ClassDTO getClassDetail(Integer class_id) {
     	//1. 강의(클래스) 엔티티 한 건 가져옴
     	ClassEntity classEntity = courseRepo.findById(class_id).orElseThrow();
@@ -102,7 +142,6 @@ public class ClassService {
 				.map(MeterialDTO::fromEntity)
 				.toList();
 	}
-
 
 
 }

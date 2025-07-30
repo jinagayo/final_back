@@ -31,17 +31,20 @@ public class MeterialEntity {
 	private String type;//종류(영상,과제)
 	
 	@Column(name = "time")
-	private long time;//동영상길이
+
 	
 	@Column(name = "title")
-	private String title;
+	private String title;//제목
+
+	private long time;//동영상길이
 	
+
 	@Column(name = "detail")
 	private String detail;
 	
 	public MeterialEntity(MeterialDTO dto) {
-		this.meterId = dto.getMeter_id();
-		this.classId = dto.getClass_id();
+		this.meterId = dto.getMeterId();
+		this.classId = dto.getClassId();
 		this.seq = dto.getSeq();
 		this.content = dto.getContent();
 		this.type = dto.getType();
