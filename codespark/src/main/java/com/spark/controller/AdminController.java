@@ -250,17 +250,22 @@ public class AdminController {
              return ResponseEntity.status(500).body(Map.of("success", false, "message", "업로드 실패"));
         }
     }
-    
     @GetMapping("/banner/latest")
     public ResponseEntity<?> getLatestBannerImage(){
-    	  Optional<CommonEntity> banner = commonRepository.findById("BANNER_MAIN");
-    	
+         Optional<CommonEntity> banner = commonRepository.findById("BANNER_MAIN");
+       
 
-    	    String url = banner.map(CommonEntity::getName)
-    	                       .orElse("/img/main.png");
-
-    	    return ResponseEntity.ok(Map.of("url", url));
-    	}
+           String url = banner.map(CommonEntity::getName)
+                              .orElse("/img/main.png");
+           
+           List<ClassInfoDTO> classlist = courseservice.getMain();
+           
+           Map<String,Object> map = new HashMap<>();
+           map.put("url", url);
+           map.put("courses", classlist);
+           return ResponseEntity.ok(map);
+       }
+    
     
     	
     
