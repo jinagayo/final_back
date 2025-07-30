@@ -12,4 +12,5 @@ public class SubjectReviewDTO {
 	private String class_id;//강의 코드
 	private String content;//한줄평
 	private int rating;//별점
+	private int attId;//attendacnce 번호
 }
