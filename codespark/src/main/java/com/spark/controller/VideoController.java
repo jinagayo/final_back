@@ -88,7 +88,7 @@ public class VideoController {
 	            video.setContent(request.getKey());
 	            video.setTime(request.getDuration());
 	            video.setType("MET001"); // 고정: video
-	            int nextSeq = meterialRepository.findMaxSeqByClassId(Integer.parseInt(request.getClassId())) + 1;
+	            int nextSeq = meterialRepository.findNextSeqByClassId(Integer.parseInt(request.getClassId())) + 1;
 	            video.setSeq(nextSeq);   // ✅ 자동으로 순번 설정
 	            meterialRepository.save(video);
 	            
@@ -133,8 +133,8 @@ public class VideoController {
 		        return ResponseEntity.status(404).body("해당 자료를 찾을 수 없습니다.");
 		    }
 		 MeterialDTO m = new MeterialDTO(); 
-		 m.setClass_id(meterial.getClassId());
-		 m.setMeter_id(meterial.getMeterId());
+		 m.setClassId(meterial.getClassId());
+		 m.setMeterId(meterial.getMeterId());
 		 m.setContent(meterial.getContent());
 		 m.setDetail(meterial.getDetail());
 		 return ResponseEntity.ok(m);

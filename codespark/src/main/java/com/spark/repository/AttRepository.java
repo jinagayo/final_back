@@ -13,4 +13,6 @@ public interface AttRepository extends JpaRepository<AttendanceEntity, Integer>{
 	@Query("SELECT COUNT(a) FROM AttendanceEntity a WHERE a.classId = :classId")
 	int countByClassId(@Param("classId") Integer class_id);
 
+	Integer findByStuIdAndClassId(String stuId, String classId);
+
 }

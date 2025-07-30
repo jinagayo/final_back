@@ -1,7 +1,12 @@
 package com.spark.Entity;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
+import com.spark.dto.ProfileUpdateDTO;
 import com.spark.dto.UserDTO;
 
 import jakarta.persistence.Column;
@@ -18,6 +23,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name="user")
 @Data
+@SQLDelete(sql = "UPDATE user SET is_active = false WHERE user_id = ?")
+@Where(clause = "is_active = true")
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {
@@ -56,9 +63,36 @@ public class UserEntity {
 	private String img;//사진
 	
 	@Column(nullable = true,name="state")
-	private String state = "ACTIVE";
+	private String state = "ACTIVE";	
+	@Column(name = "created_at", insertable = false, updatable = false)
+	private Timestamp createdAt;
+
+	@Column(name = "updated_at", insertable = false, updatable = false)
+	private Timestamp updatedAt;
+
+	
+	@Column(name="updated_by")
+	private String updatedBy;
+	
+	@Column(name="created_by")
+	private String createdBy;
+
 	
 	public UserEntity(UserDTO dto) {
+		this.userId = dto.getUser_id();
+		this.pw = dto.getPw();
+		this.name = dto.getName();
+		this.address1 = dto.getAddress1();
+		this.address2 = dto.getAddress2();
+		this.addressnum = dto.getAddressnum();
+		this.birthday = dto.getBirthday();
+		this.phone = dto.getPhone();
+		this.position = dto.getPosition();
+		this.email = dto.getEmail();
+		this.img = dto.getImg();
+		this.state = dto.getState();
+	}
+	public UserEntity(ProfileUpdateDTO dto) {
 		this.userId = dto.getUser_id();
 		this.pw = dto.getPw();
 		this.name = dto.getName();

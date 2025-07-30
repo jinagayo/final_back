@@ -14,6 +14,6 @@ public class StudentDTO {
 	private String award;//수상이력
 	private String skill;//기술스택
 	private String license;//자격증
-	private String lauguage; // 어학사전
+	private String language; // 어학사전
 	private String advice; // 취업상담
 }

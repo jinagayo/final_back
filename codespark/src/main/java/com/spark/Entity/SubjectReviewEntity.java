@@ -27,10 +27,16 @@ public class SubjectReviewEntity {
 	@Column(name = "rating")
 	private int rating;//별점
 	
+
+	@Column(name = "att_id")
+	private int attId;//attendacnce 번호
+	
+	
 	public SubjectReviewEntity(SubjectReviewDTO dto) {
 		this.reviewnum = dto.getReviewnum();
 		this.classId = dto.getClass_id();
 		this.content = dto.getContent();
 		this.rating = dto.getRating();
+		this.attId = dto.getAttId();
 	}
 }
