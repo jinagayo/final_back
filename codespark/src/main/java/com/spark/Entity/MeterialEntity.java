@@ -31,12 +31,11 @@ public class MeterialEntity {
 	private String type;//종류(영상,과제)
 	
 	@Column(name = "time")
-
+	private Integer  time;//동영상길이
 	
 	@Column(name = "title")
 	private String title;//제목
 
-	private long time;//동영상길이
 	
 
 	@Column(name = "detail")
