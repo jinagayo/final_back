@@ -25,6 +25,7 @@ import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.SocialPaymentDTO;
 import com.spark.service.CourseService;
+import com.spark.service.S3Service;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -36,6 +37,8 @@ public class CourseController {
 
     @Autowired
     private CourseService courseService;
+    @Autowired
+    private S3Service s3Service;
     
     
     @GetMapping("List")
@@ -84,6 +87,14 @@ public class CourseController {
     	
     	return null;
 	}
+    @PostMapping("teacher/upload-image")
+    public ResponseEntity<?> uploadImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("folderName") String folderName) throws IOException {
+        String key = s3Service.upload(file, folderName);
+        String imageUrl = "https://my-lecture-video.s3.ap-northeast-2.amazonaws.com/" + key;
+        return ResponseEntity.ok(Map.of("url", imageUrl, "key", key));
+    }
     
     @GetMapping("teacher/Application")
     public ResponseEntity<?> TeacherApplication() {

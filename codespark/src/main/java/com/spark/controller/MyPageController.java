@@ -29,6 +29,7 @@ import com.spark.dto.UserDTO;
 import com.spark.Entity.StudentEntity;
 import com.spark.Entity.TeacherEntity;
 import com.spark.service.CourseService;
+import com.spark.service.S3Service;
 import com.spark.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,12 +49,15 @@ public class MyPageController {
 	@Autowired
 	private CourseService courseService;
 	
+	@Autowired
+	private S3Service s3Service;
+	
     @GetMapping("Profile")
 	public ResponseEntity<UserEntity> profile(HttpSession session){
     	System.out.println("profile 컨트롤러 작동중");
     	String id = (String)session.getAttribute("login");
     	UserEntity data = userService.UserProfile(id);
-    	System.out.println(data);
+    	System.out.println("data:" + data);
         return ResponseEntity.ok().body(data);
 	}    
     @GetMapping("Student")
@@ -137,7 +141,10 @@ public class MyPageController {
         if (dto.getAddress1() != null) entity.setAddress1(dto.getAddress1());
         if (dto.getAddress2() != null) entity.setAddress2(dto.getAddress2());
         if (dto.getAddressnum() != null) entity.setAddressnum(dto.getAddressnum());
-        if (dto.getBirthday() != null) entity.setBirthday(dto.getBirthday());
+        if (dto.getBirthday() != null) {
+            // dto.getBirthday()가 Date 타입일 때
+            entity.setBirthday(dto.getBirthday().toString()); // 또는 원하는 포맷으로 변환
+        }
         if (dto.getPhone() != null) entity.setPhone(dto.getPhone());
         if (dto.getEmail() != null) entity.setEmail(dto.getEmail());
         if (dto.getImg() != null) entity.setImg(dto.getImg());
@@ -147,5 +154,23 @@ public class MyPageController {
     	UserEntity data = userService.UserUpdate(entity);
     	return ResponseEntity.ok(data);
     	
+    }
+    
+    @PostMapping("ProfileImageUpload")
+    public ResponseEntity<Map<String, Object>> uploadProfileImage(
+    		@RequestParam("file") MultipartFile file,
+    		@RequestParam(value = "folderName", defaultValue = "user/profile") String folderName
+    		){
+    	try {
+    		String key = s3Service.upload(file, folderName);
+    		Map<String, Object> result = new HashMap<>();
+    		result.put("key", key);
+    		return ResponseEntity.ok(result);
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    		Map<String, Object> error = new HashMap<>();
+    		error.put("message", "이미지 업로드 실패: " + e.getMessage());
+    		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    	}
     }
 }
