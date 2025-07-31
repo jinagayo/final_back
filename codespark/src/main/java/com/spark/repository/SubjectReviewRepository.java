@@ -12,4 +12,6 @@ public interface SubjectReviewRepository extends JpaRepository<SubjectReviewEnti
 
 	List<SubjectReviewEntity> findByAttId(Integer attId);
 
+	List<SubjectReviewEntity> findByClassId(String classId);
+
 }

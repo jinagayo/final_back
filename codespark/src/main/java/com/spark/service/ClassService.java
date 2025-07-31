@@ -152,4 +152,10 @@ public class ClassService {
 	}
 
 
+	public List<SubjectReviewEntity> getAllReview(String classId) {
+		// TODO Auto-generated method stub
+		return subjectReviewRepo.findByClassId(classId);
+	}
+
+
 }

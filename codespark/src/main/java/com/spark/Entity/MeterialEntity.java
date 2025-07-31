@@ -36,10 +36,10 @@ public class MeterialEntity {
 	@Column(name = "title")
 	private String title;//제목
 
-	
-
 	@Column(name = "detail")
 	private String detail;
+
+
 	
 	public MeterialEntity(MeterialDTO dto) {
 		this.meterId = dto.getMeterId();
