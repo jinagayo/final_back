@@ -1,9 +1,14 @@
 package com.spark.Entity;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.spark.dto.TestDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 import jakarta.persistence.Table;
@@ -13,10 +18,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @Table(name = "test")
+@SQLDelete(sql = "UPDATE test SET is_active = false WHERE test_id = ?")
+@Where(clause = "is_active = true")
 @NoArgsConstructor
 public class TestEntity {
 	@Id
 	@Column(name = "test_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int testId;//테스트문제id
 	
 	@Column(name = "meterial_id")
