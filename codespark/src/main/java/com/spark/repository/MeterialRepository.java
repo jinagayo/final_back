@@ -22,6 +22,7 @@ public interface MeterialRepository extends JpaRepository<MeterialEntity, Intege
   
 	MeterialEntity findByMeterId(Integer id);
 
+
 	
 
 }

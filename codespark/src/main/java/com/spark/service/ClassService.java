@@ -157,4 +157,17 @@ public class ClassService {
 	}
 
 
+	public MeterialEntity TeacherassignmentForm(MeterialDTO dto) {
+		MeterialEntity entity = new MeterialEntity(dto);
+		MeterialEntity data = meterialRepo.save(entity);
+		return data;
+	}
+
+
+	public MeterialEntity getMeterialOne(String meterialId) {
+		MeterialEntity data = meterialRepo.findByMeterId(Integer.parseInt(meterialId));
+		return data;
+	}
+
+
 }
