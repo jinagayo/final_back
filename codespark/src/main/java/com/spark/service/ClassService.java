@@ -11,13 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.MeterialDTO;
 import com.spark.dto.SubjectReviewDTO;
+import com.spark.dto.TestDTO;
 import com.spark.Entity.MeterialEntity;
+import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.SubjectReviewEntity;
+import com.spark.Entity.TestEntity;
 import com.spark.repository.AttendanceRepository;
 import com.spark.repository.BoardRepository;
 import com.spark.repository.CourseRepository;
 import com.spark.repository.MeterialRepository;
+import com.spark.repository.MeterialSubRepository;
 import com.spark.repository.SubjectReviewRepository;
+import com.spark.repository.TestRepository;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,7 +59,11 @@ public class ClassService {
     @Autowired
     private MeterialRepository meterialRepo;
     @Autowired
+    private MeterialSubRepository meterialSubRepo;
+    @Autowired
     private AttRepository attRepo;
+    @Autowired
+    private TestRepository testRepo;
     
     ClassService(CourseRepository courseRepo) {
         this.courseRepo = courseRepo;
@@ -168,6 +178,48 @@ public class ClassService {
 		MeterialEntity data = meterialRepo.findByMeterId(Integer.parseInt(meterialId));
 		return data;
 	}
+
+
+	public MeterialEntity testmaterial(MeterialDTO dto) {
+		MeterialEntity entity = new MeterialEntity(dto);
+		return meterialRepo.save(entity);
+	}
+
+
+	public TestEntity testquestions(TestEntity entity) {
+		return testRepo.save(entity);
+	}
+
+
+	public void materialsDelete(MeterialEntity entity) {
+		 meterialRepo.delete(entity);;
+	}
+
+
+	public MeterialEntity MeterialDeleteSeq(String classId) {
+		List<MeterialEntity> list = meterialRepo.findByClassId(Integer.parseInt(classId));
+		int i=1;
+		for(MeterialEntity entity :list) {
+			entity.setSeq(i++);
+			meterialRepo.save(entity);
+		}
+		return null;
+	}
+
+
+	public void materialsReorder(MeterialDTO dto) {
+		meterialRepo.changeSeq(dto.getMeterId(),dto.getSeq());
+		
+	}
+
+
+	public List<MeterialSubEntity> getMeterialSub(Integer MetId) {
+		
+		return meterialSubRepo.findByMeterialId(MetId);
+	}
+
+
+
 
 
 }
