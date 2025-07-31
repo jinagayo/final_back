@@ -45,6 +45,12 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
      Page<UserEntity> findStudentsWithSearch(@Param("position") String position, 
                                            @Param("search") String search, 
                                            Pageable pageable);
+    //승인 대기중인 강사 검색
+    @Query("SELECT u FROM UserEntity u WHERE u.position = '0'")
+    Page<UserEntity> findByPositionZero(Pageable pageable);
     
-    
+    @Query("SELECT u FROM UserEntity u WHERE u.position = '0' AND " +
+    	       "(u.userId LIKE %:search% OR u.name LIKE %:search% OR u.email LIKE %:search%)")
+    	Page<UserEntity> findByPositionZeroWithSearch(@Param("search") String search, Pageable pageable);
+
 }
