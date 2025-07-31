@@ -73,7 +73,16 @@ public class ClassController {
     	System.out.println(dto);
     	classService.saveReview(dto);
     	
+    	
         return ResponseEntity.ok().body("");
+    }
+
+    @GetMapping("assignment")
+    public ResponseEntity<?> assignment(@RequestParam("meterial_id") String meterialId) {
+    	System.out.println("assignment 작동중");
+    	MeterialEntity data = classService.getMeterialOne(meterialId);
+    	System.out.println(data);
+    	return  ResponseEntity.ok().body(data);
     }
     
 }

@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,6 +26,7 @@ import com.spark.Entity.UserEntity;
 import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.MeterialDTO;
+import com.spark.repository.MeterialRepository;
 import com.spark.repository.UserRepository;
 import com.spark.service.ClassService;
 import com.spark.service.CourseService;
@@ -37,6 +40,9 @@ public class TeacherController {
 	
 	private final ClassService classService;
 	
+
+    @Autowired
+    private MeterialRepository meterialRepo;
 	@Autowired
 	public TeacherController(ClassService classService) {
 		this.classService = classService;
@@ -79,13 +85,21 @@ public class TeacherController {
 
 	@GetMapping("/class/{classId}/materials")
 	public ResponseEntity<?> getClassmaterials(@PathVariable String classId){
-		List<MeterialEntity> meterial = classService.getMeterials(classId);
+		List<MeterialEntity> meterial = classService.getMeterials(Integer.parseInt(classId));
 		    return ResponseEntity.ok().body(meterial);
 	}
 	@GetMapping("/class/{classId}/reviews")
 	public ResponseEntity<?> getClassreviews(@PathVariable String classId){
 		List<SubjectReviewEntity> meterial = classService.getAllReview(classId);
 		    return ResponseEntity.ok().body(meterial);
+	}
+	@PostMapping("/assignmentForm")
+	public ResponseEntity<?> assignmentForm(@RequestBody MeterialDTO dto){
+		System.out.println("assignmentForm 동작");
+		dto.setSeq(meterialRepo.findNextSeqByClassId(dto.getClassId())+1);
+		System.out.println(dto);
+		MeterialEntity data = classService.TeacherassignmentForm(dto);
+		    return ResponseEntity.ok().body(data);
 	}
 	
 	//클래스 강좌 목록
