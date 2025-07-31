@@ -26,7 +26,7 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
             "FROM `class` c JOIN `user` u ON c.teach_id = u.user_id JOIN `common` com ON c.sub_id = com.com_id where c.state='STA001' AND c.is_active = true "
             + "ORDER BY c.updated_at desc ",
 	    nativeQuery = true)
-	List<ClassInfoDTO> findAllClass();
+	List<ClassInfoDTO> findAllClass(); 
 	
 	//강사의 강의 신청 목록 조회
 	@Query(value = "SELECT c.class_id as classId, c.name as name, c.detail as detail, c.price as price, c.intro as intro, c.mark as mark, "
@@ -34,6 +34,7 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
             "FROM `class` c JOIN `user` u ON c.teach_id = u.user_id JOIN `common` com ON c.sub_id = com.com_id where teach_id=:teachId AND c.is_active = true",
 	    nativeQuery = true)
 	List<ClassInfoDTO> findByTeachId(@Param("teachId")String teachId);
+
 	
 	//검색
 	Page<ClassEntity> findByTeachIdAndNameContainingIgnoreCase(String teachId, String name, Pageable pageable);
@@ -81,7 +82,7 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
     		+ "  from class c JOIN user u ON c.teach_id=u.user_id JOIN attendance a ON a.class_id=c.class_id WHERE a.stu_id=:id",  
 	        nativeQuery = true)
 	List<Map<String, Object>> getMyClass(@Param("id") String id);
-	
+	 
 	
 
 

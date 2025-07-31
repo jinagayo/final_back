@@ -18,8 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.spark.Entity.ClassEntity;
+import com.spark.Entity.MeterialEntity;
+import com.spark.Entity.SubjectReviewEntity;
 import com.spark.Entity.UserEntity;
 import com.spark.dto.ClassDTO;
+import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.MeterialDTO;
 import com.spark.repository.UserRepository;
 import com.spark.service.ClassService;
@@ -69,10 +72,20 @@ public class TeacherController {
 	@GetMapping("/class/{classId}")
 	public ResponseEntity<?> getClassDetail(@PathVariable String classId){
 		 System.out.println("=== [API] classId: " + classId); 
-		 	int id = Integer.parseInt(classId);  // 수동 파싱
-		    ClassDTO dto = classService.getClassDetail(id);
-		    System.out.println("=== [API] classDTO.Detail: " + dto.getDetail());
-		    return ResponseEntity.ok().body(Map.of("data",dto));
+		    ClassInfoDTO dto = classService.getClass(classId);
+		    System.out.println("=== [API] classDTO.name: " + dto.getName());
+		    return ResponseEntity.ok().body(dto);
+	}
+
+	@GetMapping("/class/{classId}/materials")
+	public ResponseEntity<?> getClassmaterials(@PathVariable String classId){
+		List<MeterialEntity> meterial = classService.getMeterials(classId);
+		    return ResponseEntity.ok().body(meterial);
+	}
+	@GetMapping("/class/{classId}/reviews")
+	public ResponseEntity<?> getClassreviews(@PathVariable String classId){
+		List<SubjectReviewEntity> meterial = classService.getAllReview(classId);
+		    return ResponseEntity.ok().body(meterial);
 	}
 	
 	//클래스 강좌 목록
