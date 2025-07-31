@@ -272,12 +272,16 @@ public class AdminController {
             // 페이징 계산
             Pageable pageable = PageRequest.of(page - 1, size);
             Page<UserEntity> teacherPage = userService.getTeachersPaginated(pageable, search); // 강사용 메소드 사용
-
+            Page<UserEntity> teacherWait = userService.getZeroPositionUsers(pageable, search);//승인중인 강사
+            
+            System.out.println("teacherWait" + teacherWait);
+            
             response.put("success", true);
             response.put("data", teacherPage.getContent()); // 강사 페이징 데이터
             response.put("currentPage", page);
             response.put("totalPages", teacherPage.getTotalPages());
-            response.put("totalElements", teacherPage.getTotalElements());
+            response.put("totalElements", teacherWait.getTotalElements());
+            response.put("pendingTotal", teacherWait.getTotalElements()); // 승인 대기 강사 수
             response.put("size", size);
             response.put("hasNext", teacherPage.hasNext());
             response.put("hasPrevious", teacherPage.hasPrevious());

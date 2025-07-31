@@ -41,12 +41,21 @@ public class UserService {
             return userRepository.findStudentsWithSearch("1", search.trim(), pageable);
         }
     }
-
+    
     public Page<UserEntity> getTeachersPaginated(Pageable pageable, String search) {
         if (search == null || search.trim().isEmpty()) {
             return userRepository.findByPosition("2", pageable);
         } else {
             return userRepository.findStudentsWithSearch("2", search.trim(), pageable);
+        }
+    }
+    
+    //승인대기중인 강사 
+    public Page<UserEntity> getZeroPositionUsers(Pageable pageable, String search) {
+        if (search == null || search.trim().isEmpty()) {
+            return userRepository.findByPosition("0", pageable);
+        } else {
+            return userRepository.findByPositionZeroWithSearch(search.trim(), pageable);
         }
     }
 
