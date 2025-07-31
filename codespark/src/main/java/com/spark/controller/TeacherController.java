@@ -91,7 +91,7 @@ public class TeacherController {
 	//클래스 강좌 목록
 	@GetMapping("class/{classId}/lectures")
 	public ResponseEntity<?> getLectures(@PathVariable String classId){
-		List<MeterialDTO> lectures = classService.getLectures(classId);
+		List<MeterialDTO> lectures = classService.getLectures(Integer.parseInt(classId));
 		return ResponseEntity.ok().body(Map.of("data",lectures));
 	}
 }

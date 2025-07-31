@@ -1,6 +1,6 @@
 package com.spark.controller;
-
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.io.File;
 import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Sort;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +29,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.CommonEntity;
 import com.spark.Entity.UserEntity;
+import com.spark.controller.BoardController.ApiResponse;
+import com.spark.dto.ApiResponseComment;
 import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
 import com.spark.repository.CommonRepository;
@@ -372,6 +375,57 @@ public class AdminController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("success", false);
             errorResponse.put("message", "문제 등록 중 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.status(500).body(errorResponse);
+        }
+    }
+    
+    //코딩 문제 조회
+    @GetMapping("/list")
+    public ResponseEntity<Map<String, Object>> getCodingList(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "latest") String sortBy,
+            @RequestParam(defaultValue = "all") String level) {
+    	return coService.getCodingListWithPaging(page,size,search,sortBy,level);
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<Map<String, Object>> getCodingDetail(@PathVariable int id) {
+    	try {
+            System.out.println("=== 문제 상세 조회 API 호출 ===");
+            System.out.println("요청된 문제 ID: " + id);
+            
+            // 서비스에서 문제 상세 정보 조회
+            CodingDTO problemData = coService.getCodingDetail(id);
+            
+            if (problemData == null) {
+                Map<String, Object> errorResponse = new HashMap<>();
+                errorResponse.put("success", false);
+                errorResponse.put("message", "문제를 찾을 수 없습니다.");
+                errorResponse.put("code", "NOT_FOUND");
+                return ResponseEntity.status(404).body(errorResponse);
+            }
+            
+            // 성공 응답
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("data", problemData);
+            response.put("timestamp", System.currentTimeMillis());
+            
+            System.out.println("문제 상세 조회 성공: " + problemData.getTitle());
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("문제 상세 조회 오류: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "서버 내부 오류가 발생했습니다.");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("timestamp", System.currentTimeMillis());
+            
             return ResponseEntity.status(500).body(errorResponse);
         }
     }

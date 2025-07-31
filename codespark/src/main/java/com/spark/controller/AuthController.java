@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -361,4 +362,53 @@ public class AuthController {
             throw new RuntimeException("카카오 사용자 정보 요청 실패: " + e.getMessage(), e);
         }
     }
+    
+    
+    //권한 체크 메서드
+    @GetMapping("/api/user/info")
+    public ResponseEntity<Map<String, Object>> getUserInfo(HttpSession session) {
+        try {
+            System.out.println("=== 사용자 정보 조회 ===");
+            
+            // 세션에서 정보 추출
+            String loginId = (String) session.getAttribute("login");
+            String position = (String) session.getAttribute("position");
+            String name = (String) session.getAttribute("name");
+            
+            System.out.println("세션 login: " + loginId);
+            System.out.println("세션 position: " + position);
+            System.out.println("세션 name: " + name);
+            
+            Map<String, Object> response = new HashMap<>();
+            
+            if (loginId == null) {
+                // 로그인하지 않은 상태
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            
+            // 사용자 정보 구성
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("userId", loginId);
+            userInfo.put("name", name);
+            userInfo.put("position", position != null ? Integer.parseInt(position) : 0);
+            
+            response.put("success", true);
+            response.put("message", "사용자 정보 조회 성공");
+            response.put("data", userInfo);
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (Exception e) {
+            System.err.println("사용자 정보 조회 오류: " + e.getMessage());
+            e.printStackTrace();
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "사용자 정보 조회 중 오류가 발생했습니다.");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
 }

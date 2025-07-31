@@ -242,11 +242,6 @@ public class BoardController {
         try {
             // 세션에서 사용자 정보 추출 (실제 구현에 맞게 수정);
             String userId = getCurrentUserId(httpRequest);
-            
-            System.out.println("컨트롤러에 도달 -------"  + userId);
-            
-            
-            
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(ApiResponseComment.error("로그인이 필요합니다."));
@@ -266,19 +261,18 @@ public class BoardController {
     
     
     //댓글 수정
-    @PutMapping("/board/comments/{commentId}")
+    @PutMapping("/comments/{commentId}")
     public ResponseEntity<ApiResponseComment<CommentDTO>> updateComment(
             @PathVariable("commentId") int commentId,
             @Valid @RequestBody CommentRequestDTO request,
             HttpServletRequest httpRequest) {
-        
+
         try {
             String userId = getCurrentUserId(httpRequest);
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(ApiResponseComment.error("로그인이 필요합니다."));
             }
-            
             CommentDTO comment = commService.updateComment(commentId, request, userId);
             return ResponseEntity.ok(ApiResponseComment.success("댓글 수정 성공", comment));
             
@@ -292,8 +286,37 @@ public class BoardController {
     }
     
     private String getCurrentUserId(HttpServletRequest request) {
-        // 세션에서 사용자 ID 추출
-        Object userId = request.getSession().getAttribute("login");
-        return userId != null ? userId.toString() : null;
+        HttpSession session = request.getSession();
+        Object loginId = session.getAttribute("login");
+        if (loginId != null) {
+            return loginId.toString();
+        }
+        return null;
     }
+    
+    //댓글 삭제
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<ApiResponseComment<Void>> deleteComment(
+            @PathVariable("commentId") int commentId,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            String userId = getCurrentUserId(httpRequest);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+            }
+            
+            commService.deleteComment(commentId, userId);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 삭제 성공", null));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponseComment.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 삭제 중 오류가 발생했습니다."));
+        }
+    }
+    
 }
