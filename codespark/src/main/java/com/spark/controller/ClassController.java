@@ -84,5 +84,5 @@ public class ClassController {
     	System.out.println(data);
     	return  ResponseEntity.ok().body(data);
     }
-    
+
 }

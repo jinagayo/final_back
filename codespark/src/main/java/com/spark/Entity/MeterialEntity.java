@@ -1,5 +1,8 @@
 package com.spark.Entity;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.spark.dto.MeterialDTO;
 
 import jakarta.persistence.Column;
@@ -13,6 +16,8 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "meterial")
+@SQLDelete(sql = "UPDATE test SET is_active = false WHERE test_id = ?")
+@Where(clause = "is_active = true")
 @NoArgsConstructor
 @Data
 public class MeterialEntity {
