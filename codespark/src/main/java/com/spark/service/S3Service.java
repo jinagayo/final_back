@@ -47,11 +47,12 @@ public class S3Service {
 	
 	
 	public String upload(MultipartFile file, String folderName) throws IOException{
-		String key = folderName + "/main.png"; // ← 이름을 고정시킴
-		 
+		
 		String originalFilename = file.getOriginalFilename();
 		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-		String fileName = UUID.randomUUID() + extension;
+	    // 랜덤 파일명(중복 방지)
+	    String uuid = UUID.randomUUID().toString();
+	    String key = folderName + "/" + uuid + extension;
 
 		
 		PutObjectRequest putRequest = PutObjectRequest.builder()
@@ -64,7 +65,7 @@ public class S3Service {
 	
 			return key;
 	}
-	
+	//이미지/영상 업로드 용도
 	public String generatePresignedUploadUrl(String fileName) {
 		S3Presigner presigner = S3Presigner.builder()
 				.region(Region.AP_NORTHEAST_2)
@@ -87,6 +88,7 @@ public class S3Service {
 		        return presigner.presignPutObject(presignRequest).url().toString();
 		    }
 
+		//이미지/영상/자료 다운로드·스트리밍 용도
 		    public String generatePresignedReadUrl(String fileName){
 		        GetObjectRequest objectRequest = GetObjectRequest.builder()
 		            .bucket(bucketName)
