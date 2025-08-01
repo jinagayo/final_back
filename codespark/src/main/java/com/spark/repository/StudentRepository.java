@@ -7,5 +7,5 @@ import com.spark.Entity.StudentEntity;
 
 @Repository
 public interface StudentRepository  extends JpaRepository<StudentEntity, String>{
-
+	
 }

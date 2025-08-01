@@ -67,6 +67,9 @@ public class ClassService {
 	}
 	public ClassInfoDTO getClass(String class_id) {
 		ClassInfoDTO data = courseRepo.findClassInfo(class_id);
+		data.setQnaCount(qnaRepo.countByClassId(Integer.parseInt(class_id)));
+		data.setLectureCount(lectureRepo.countByClassId(Integer.parseInt(class_id)));
+		data.setStudentCount(attRepo.countByClassId(Integer.parseInt(class_id)));
 		return data;
 	}
 	public List<MeterialEntity> getMeterials(Integer classId) {
@@ -108,10 +111,6 @@ public class ClassService {
     	dto.setImg(classEntity.getImg());
     	dto.setIntro(classEntity.getIntro());
     	dto.setName(classEntity.getName());
-    	dto.setLectureCount(lectureCount);
-    	dto.setQnaCount(qnaCount);
-    	dto.setStudentCount(studentCount);
-    	
     	return dto;
     }
     
@@ -128,8 +127,6 @@ public class ClassService {
 	    // **이 map 내부에서 직접 set 해줘야 함**
 	    return result.map(entity -> {
 	        ClassDTO dto = ClassDTO.fromEntity(entity);
-	        dto.setLectureCount(lectureRepo.countByClassId(entity.getClassId()));
-	        dto.setQnaCount(qnaRepo.countByClassId(entity.getClassId()));
 	        return dto;
 	    });
 	}

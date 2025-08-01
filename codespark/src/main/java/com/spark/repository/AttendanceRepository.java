@@ -20,5 +20,9 @@ public interface AttendanceRepository extends JpaRepository<AttendanceEntity, In
 	@Query(value = "SELECT att_id from attendance where stu_id=:id and class_id=:classId",
 	    nativeQuery = true)
 	Integer findAttId(@Param("id")String id, @Param("classId")String classId);
+	
+	@Query("SELECT COUNT(a) FROM AttendanceEntity a WHERE a.classId = :classId")
+	Integer countByClassId(@Param("classId") int i);
+
 
 }

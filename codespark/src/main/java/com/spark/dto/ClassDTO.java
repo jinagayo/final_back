@@ -30,10 +30,6 @@ public class ClassDTO {
 	private Timestamp   createdAt;
 	private Timestamp   updatedAt;
 
-	private int lectureCount;  //강의수
-	private int qnaCount;    //qna개수
-	private int studentCount;  //수강생 수
-	
 	public static ClassDTO fromEntity(ClassEntity entity) {
 		ClassDTO dto = new ClassDTO();
 		//entity에서 값 복사

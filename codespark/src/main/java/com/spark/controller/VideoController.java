@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,6 +164,36 @@ public class VideoController {
 		}
 	}
 	
+	//1.강의노트 조회 (GET)
+	@GetMapping("/{meterialId}/note")
+	public ResponseEntity<?> getNote(
+			@PathVariable Integer meterialId,
+			@RequestParam String stdId){
+		Optional<MeterialSubEntity> opt = materialSubRepository.findByMeterialIdAndStdId(meterialId, stdId);
+		String note = opt.map(MeterialSubEntity::getContent).orElse("");
+		return ResponseEntity.ok(Map.of("content",note));
+	}
+	
+	//2. 강의노트 저장 (POST)
+	@PostMapping("/{meterialId}/note")
+	public ResponseEntity<?> saveNote(
+			@PathVariable Integer meterialId,
+			@RequestBody Map<String, String> req){
+		String stdId = req.get("stdId");
+		String content = req.get("content");
+		
+		MeterialSubEntity entity = materialSubRepository
+				.findByMeterialIdAndStdId(meterialId, stdId)
+				.orElseGet(() -> {
+					MeterialSubEntity e = new MeterialSubEntity();
+					e.setMeterialId(meterialId);
+					e.setStdId(stdId);
+					return e;
+				});
+		entity.setContent(content);
+		materialSubRepository.save(entity);
+		return ResponseEntity.ok().build();
+	}
 	
 	@GetMapping("/video/progress/class/{classId}/student/{studentId}")
 	public ResponseEntity<?> getStudentProgress(
