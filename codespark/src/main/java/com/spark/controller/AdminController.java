@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,7 @@ import com.spark.dto.ClassInfoDTO;
 import com.spark.repository.CourseRepository;
 import com.spark.repository.UserRepository;
 import com.spark.service.CourseService;
+import com.spark.service.SearchService;
 import com.spark.dto.CodingDTO;
 import com.spark.service.CodingService;
 import com.spark.service.UserService;
@@ -56,9 +58,12 @@ public class AdminController {
 	@Autowired
 	private CourseService courseservice;
 
-  @Autowired
+	@Autowired
 	private CodingService coService;
-
+	
+	//검색기능
+	@Autowired
+	private SearchService searchService;
 	
 	// 승인 대기중인 강사 목록조회
 	@GetMapping("/pending-teachers")
@@ -460,4 +465,36 @@ public class AdminController {
     
     }
     
+    
+    //topbar 검색기능
+    @GetMapping("/search")
+    public ResponseEntity<?> search(
+        @RequestParam String q,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int limit
+    ) {
+        // 🔥 로그 추가
+        System.out.println("=== SearchController 진입 ===");
+        System.out.println("검색어: " + q);
+        System.out.println("limit: " + limit);
+        
+        try {
+            if (q == null || q.trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "message", "검색어를 입력하세요"));
+            }
+            
+            Map<String, Object> result = searchService.searchData(q.trim(), page, limit);
+            
+            // 🔥 결과 로그
+            System.out.println("검색 결과: " + result);
+            
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                .body(Map.of("success", false, "message", "검색 중 오류가 발생했습니다."));
+        }
+    }
 }
