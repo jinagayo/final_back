@@ -128,7 +128,7 @@ public class BoardController {
     }
     
     //게시글 수정
-    @PutMapping("/{boardId}")
+    @PutMapping("/edit/{boardId}")
     public ResponseEntity<ApiResponse> updateBoard(@PathVariable int boardId, @RequestBody BoardDTO boardDTO) {
         try {
             boardDTO.setBoard_id(boardId);

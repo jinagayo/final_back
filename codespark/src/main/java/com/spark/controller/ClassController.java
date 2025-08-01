@@ -94,6 +94,7 @@ public class ClassController {
     	System.out.println(data);
     	return  ResponseEntity.ok().body(data);
     }
+
     
     @PostMapping("assignment/submit")
     public ResponseEntity<?> submitAssignment(
@@ -138,5 +139,5 @@ public class ClassController {
     	return ResponseEntity.ok(result);
     }
     
-    
+
 }

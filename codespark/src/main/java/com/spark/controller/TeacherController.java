@@ -21,11 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.spark.Entity.ClassEntity;
 import com.spark.Entity.MeterialEntity;
+import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.SubjectReviewEntity;
+import com.spark.Entity.TestEntity;
 import com.spark.Entity.UserEntity;
 import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.MeterialDTO;
+import com.spark.dto.SubjectReviewDTO;
+import com.spark.dto.TestDTO;
 import com.spark.repository.MeterialRepository;
 import com.spark.repository.UserRepository;
 import com.spark.service.ClassService;
@@ -107,5 +111,54 @@ public class TeacherController {
 	public ResponseEntity<?> getLectures(@PathVariable String classId){
 		List<MeterialDTO> lectures = classService.getLectures(Integer.parseInt(classId));
 		return ResponseEntity.ok().body(Map.of("data",lectures));
+	}
+    @PostMapping("/testmaterial")
+    public ResponseEntity<?> testmaterial(@RequestBody MeterialDTO dto) {
+    	System.out.println("testmaterial 작동중");
+		dto.setSeq(meterialRepo.findNextSeqByClassId(dto.getClassId())+1);
+    	System.out.println(dto);
+    	MeterialEntity data = classService.testmaterial(dto);
+    	
+        return ResponseEntity.ok().body(data);
+    }
+    @PostMapping("/testquestions")
+    public ResponseEntity<?> testquestions(@RequestBody List<TestDTO> list) {
+    	System.out.println("testquestions 작동중");
+    	for(TestDTO dto : list) {
+    		TestEntity entity = new TestEntity(dto);
+    		TestEntity data =  classService.testquestions(entity);
+    	}
+        return ResponseEntity.ok("");
+    }
+
+    @PostMapping("/materials/delete")
+    public ResponseEntity<?> materialsDelete(@RequestBody List<MeterialDTO> list,  @RequestParam("classId") String classId) {
+    	System.out.println("materialsDelete 작동중");
+    	for(MeterialDTO dto : list) {
+    		System.out.println(dto);
+    		MeterialEntity entity = new MeterialEntity(dto);
+    		classService.materialsDelete(entity);
+    	}
+    	MeterialEntity aes = classService.MeterialDeleteSeq(classId);
+    	
+        return ResponseEntity.ok("");
+    }
+    @PostMapping("/materials/reorder")
+    public ResponseEntity<?> materialsReorder(@RequestBody List<MeterialDTO> list,  @RequestParam("classId") String classId) {
+    	System.out.println("materialsReorder 작동중");
+    	for(MeterialDTO dto : list) {
+    		System.out.println(dto);
+    		classService.materialsReorder(dto);
+    	}
+
+        return ResponseEntity.ok("");
+    }
+    //과제물 리스트 불러오기
+	@GetMapping("/material/submissions")
+	public ResponseEntity<?> materialsubmissions(@RequestParam("meterial_id") String meterialId){
+		System.out.println("materialsubmissions 작동중"+meterialId);
+		List<MeterialSubEntity> list = classService.getMeterialSub(Integer.parseInt(meterialId));
+		for(MeterialSubEntity l : list) System.out.println(l);
+		return ResponseEntity.ok().body(list);
 	}
 }

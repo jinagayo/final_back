@@ -34,8 +34,8 @@ public class MeterialSubEntity {
 	private String stdId;
 	
 	public MeterialSubEntity(MeterialSubDTO dto) {
-		this.metersubId = dto.getMetersub_id();
-		this.meterialId = dto.getMeterial_id();
+		this.metersubId = dto.getMetersubId();
+		this.meterialId = dto.getMeterialId();
 		this.content = dto.getContent();
 		this.progress = dto.getProgress();
 		this.stdId = dto.getStdId();

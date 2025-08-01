@@ -18,4 +18,7 @@ public interface MeterialSubRepository  extends JpaRepository<MeterialSubEntity,
 	 MeterialSubEntity findByMeterialIdAndStdId(int meterialId, String stdId);
 
 	Optional<MeterialSubEntity> findByMeterialIdAndStdId(Integer meterialId, String studentId);
+	 
+	 List<MeterialSubEntity> findByMeterialId(Integer metId);
+
 }
