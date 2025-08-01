@@ -19,19 +19,23 @@ public class ClassInfoDTO {
 	private int price;//가격
 	private String intro;//짧읜 강의 소개(배너)
 	private double mark;//평점
+	private String img; //대표이미지
 	private String teacher;//강사명
 	private String subject;//과목명
-	private String img; //대표이미지
 	private String state;//강의 승인 반려 대기 여부
-	private Timestamp   createdAt;
-	private Timestamp   updatedAt;
+	private Timestamp createdAt;
+	private Timestamp updatedAt;
 
 	private String updatedBy;
 	private String createdBy;
+	private int lectureCount;
+	private int qnaCount;
+	private int studentCount;
 	
 	
     public ClassInfoDTO(int classId, String name, String detail, int price, String intro,
-            double mark, String img, String teacher, String subject, String state,Timestamp   createdAt, Timestamp   updatedAt, String updatedBy, String createdBy) {
+            double mark, String img, String teacher, String subject, String state,Timestamp createdAt,
+            Timestamp updatedAt, String updatedBy, String createdBy) {
 	this.classId = classId;
 	this.name = name;
 	this.detail = detail;
@@ -44,8 +48,8 @@ public class ClassInfoDTO {
 	this.state = state;
 	this.createdAt=createdAt;
 	this.updatedAt=updatedAt;
-	
-	this.createdBy=createdBy;
 	this.updatedBy=updatedBy;
+	this.createdBy=createdBy;
+
 	}
 }
