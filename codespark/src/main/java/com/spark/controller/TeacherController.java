@@ -1,6 +1,7 @@
 package com.spark.controller;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,7 @@ import com.spark.repository.MeterialRepository;
 import com.spark.repository.UserRepository;
 import com.spark.service.ClassService;
 import com.spark.service.CourseService;
+import com.spark.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -47,6 +49,8 @@ public class TeacherController {
 
     @Autowired
     private MeterialRepository meterialRepo;
+    @Autowired
+    private UserService userService;
 	@Autowired
 	public TeacherController(ClassService classService) {
 		this.classService = classService;
@@ -160,5 +164,27 @@ public class TeacherController {
 		List<MeterialSubEntity> list = classService.getMeterialSub(Integer.parseInt(meterialId));
 		for(MeterialSubEntity l : list) System.out.println(l);
 		return ResponseEntity.ok().body(list);
+	}
+    //테스트 리스트 불러오기
+	@GetMapping("/testList")
+	public ResponseEntity<?> testList(@RequestParam("meterial_id") String meterialId){
+		System.out.println("testList 작동중"+meterialId);
+		Map<String,Object> data = new HashMap<>();
+		MeterialEntity testInfo = classService.getMeterialOne(meterialId);
+		System.out.println(testInfo);
+		data.put("title",testInfo.getTitle());
+		List<MeterialSubEntity> entity = classService.getMeterialSub(Integer.parseInt(meterialId));
+
+		List<Map<String,Object>> list = new ArrayList<>();
+		for(MeterialSubEntity e : entity) {
+			Map<String,Object> map = new HashMap<>();
+			UserEntity student = userService.UserProfile(e.getStdId());
+			map.put("student", student.getName());
+			map.put("score", e.getContent());
+			list.add(map);
+		}
+		data.put("submit",list);
+		System.out.println(data);
+		return ResponseEntity.ok().body(data);
 	}
 }

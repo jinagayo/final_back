@@ -18,4 +18,8 @@ public interface MeterialSubRepository  extends JpaRepository<MeterialSubEntity,
 
 	 
 	 List<MeterialSubEntity> findByMeterialId(Integer metId);
+	 
+
+	 @Query("SELECT ms FROM MeterialSubEntity ms WHERE ms.meterialId = :meterialId AND ms.stdId = :id")
+	List<MeterialSubEntity> testYN(@Param("meterialId") String meterialId,@Param("id") String id);
 }

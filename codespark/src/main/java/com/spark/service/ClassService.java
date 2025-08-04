@@ -2,6 +2,7 @@ package com.spark.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -10,12 +11,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.MeterialDTO;
+import com.spark.dto.MeterialSubDTO;
 import com.spark.dto.SubjectReviewDTO;
 import com.spark.dto.TestDTO;
+import com.spark.dto.TestSubDTO;
 import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.SubjectReviewEntity;
 import com.spark.Entity.TestEntity;
+import com.spark.Entity.TestSubEntity;
 import com.spark.repository.AttendanceRepository;
 import com.spark.repository.BoardRepository;
 import com.spark.repository.CourseRepository;
@@ -23,6 +27,7 @@ import com.spark.repository.MeterialRepository;
 import com.spark.repository.MeterialSubRepository;
 import com.spark.repository.SubjectReviewRepository;
 import com.spark.repository.TestRepository;
+import com.spark.repository.TestSubRepository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +69,8 @@ public class ClassService {
     private AttRepository attRepo;
     @Autowired
     private TestRepository testRepo;
+    @Autowired
+    private TestSubRepository testSubRepo;
     
     ClassService(CourseRepository courseRepo) {
         this.courseRepo = courseRepo;
@@ -216,6 +223,56 @@ public class ClassService {
 	public List<MeterialSubEntity> getMeterialSub(Integer MetId) {
 		
 		return meterialSubRepo.findByMeterialId(MetId);
+	}
+
+
+	public List<TestEntity> getTest(String meterialId) {
+		return testRepo.findByMeterialId( Integer.parseInt(meterialId));
+	}
+
+
+	public void testSubmit(String id, TestSubDTO dto) {
+		dto.setStudId(id);
+		Optional<TestEntity> test = testRepo.findById(dto.getTestnum());
+		String answer = test.get().getAnswer();
+		if(answer.equals(dto.getSubmit())||answer==dto.getSubmit()) {
+			dto.setCorrect(true);
+		}else {
+			dto.setCorrect(false);
+		}
+		TestSubEntity entity = new TestSubEntity(dto);
+		testSubRepo.save(entity);
+	}
+
+
+	public void materialTestDone(String meterialId, String id, double score) {
+		MeterialSubDTO dto = new MeterialSubDTO();
+		dto.setMeterialId(Integer.parseInt(meterialId));
+		dto.setStdId(id);
+		dto.setContent(String.format("%.2f", score));
+		MeterialSubEntity entity = new MeterialSubEntity(dto);
+		meterialSubRepo.save(entity);
+		
+		
+	}
+
+
+	public Boolean testYN(String meterialId,String id) {
+		List<MeterialSubEntity> entity = meterialSubRepo.testYN(meterialId,id);
+		if(entity.isEmpty()) return false;
+		else return true;
+	}
+
+
+	public MeterialSubEntity getMeterialSubOne(String meterialId, String id) {
+		List<MeterialSubEntity> entity = meterialSubRepo.testYN(meterialId,id);
+		return entity.get(0);
+	}
+
+
+	public TestSubEntity getTestSub(String meterialId, String id) {
+		List<TestSubEntity> data= testSubRepo.findSubmit(meterialId,id);
+		return data.get(0);
 	}
 
 
