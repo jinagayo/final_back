@@ -27,9 +27,9 @@ public class ClassDTO {
 	private String state;//강의 승인 반려 대기 여부
 	private String updatedBy;
 	private String createdBy;
-	private Timestamp   createdAt;
-	private Timestamp   updatedAt;
-
+	private Timestamp createdAt;
+	private Timestamp updatedAt;
+	
 	public static ClassDTO fromEntity(ClassEntity entity) {
 		ClassDTO dto = new ClassDTO();
 		//entity에서 값 복사

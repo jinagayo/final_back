@@ -27,6 +27,8 @@ public class MeterialDTO {
 
 	private String detail;
 	
+	private Integer progress;
+	
 	public static MeterialDTO fromEntity(MeterialEntity entity) {
 		MeterialDTO dto = new MeterialDTO();
 		dto.setClassId(entity.getClassId());

@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.spark.Entity.MeterialSubEntity;
 import com.spark.repository.MeterialSubRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class MeterialSubService {
 
@@ -36,4 +38,15 @@ public class MeterialSubService {
 		return meterialSubRepository.findByMeterialIdAndStdId( meterialId, studentId).orElse(null);
 	}
 
-}
+	@Transactional
+	public void updateProgress(int meterialId, String stdId, double progress) {
+		MeterialSubEntity entity = meterialSubRepository.findByMeterialIdAndStdId(meterialId, stdId);
+				if(entity == null){
+				    throw new RuntimeException("not found");
+				}
+		entity.setProgress(progress);
+		meterialSubRepository.save(entity);
+		
+	}
+
+	}

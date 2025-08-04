@@ -37,6 +37,7 @@ import com.spark.repository.MeterialRepository;
 import com.spark.repository.MeterialSubRepository;
 import com.spark.repository.UserRepository;
 import com.spark.repository.VideoRepository;
+import com.spark.service.MeterialSubService;
 import com.spark.service.S3Service;
 
 import jakarta.transaction.Transactional;
@@ -60,6 +61,8 @@ public class VideoController {
 	private final AttendanceRepository attRepository;
 	@Autowired
 	private final MeterialSubRepository materialSubRepository;
+	@Autowired
+	private final MeterialSubService meterialSubService;
 	
 	// 강사(2)만 업로드 가능
 	@PostMapping("/upload")
@@ -195,33 +198,10 @@ public class VideoController {
 		return ResponseEntity.ok().build();
 	}
 	
-	@GetMapping("/video/progress/class/{classId}/student/{studentId}")
-	public ResponseEntity<?> getStudentProgress(
-	    @PathVariable int classId,
-	    @PathVariable String studentId) {
-	    
-	    List<MeterialSubEntity> progresses = materialSubRepository.findByStdIdAndClassId(studentId, classId);
-
-	    long completed = progresses.stream().filter(p -> p.getProgress() >= 100).count();
-	    int total = progresses.size();
-
-	    Map<String, Object> res = new HashMap<>();
-	    res.put("completed", completed);
-	    res.put("total", total);
-	    return ResponseEntity.ok(res);
+	@PostMapping("progress/update")
+	public ResponseEntity<?> updateProgress(@RequestBody MeterialSubEntity req){
+		meterialSubService.updateProgress(req.getMeterialId(), req.getStdId(), req.getProgress());
+		return ResponseEntity.ok().body(Map.of("result","ok"));
 	}
 	
-	@PostMapping("/progress/complete")
-	public ResponseEntity<?> markLectureAsCompleted(@RequestBody MeterialSubEntity req) {
-		System.out.println("req:" + req);
-		 MeterialSubEntity sub = materialSubRepository.findByMeterialIdAndStdId(req.getMeterialId(), req.getStdId());
-		    
-		    if (sub == null) {
-		        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("해당 진도 데이터가 없습니다.");
-		    }
-
-		    sub.setProgress(100);  // 100% 완료로 저장
-		    materialSubRepository.save(sub);
-
-		    return ResponseEntity.ok("진도 완료");
-	}}
+}
