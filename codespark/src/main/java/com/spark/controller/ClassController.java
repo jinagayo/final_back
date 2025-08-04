@@ -85,4 +85,13 @@ public class ClassController {
     	return  ResponseEntity.ok().body(data);
     }
 
+    @GetMapping("test")
+    public ResponseEntity<?> test(@RequestParam("meterial_id") String meterialId) {
+    	System.out.println("assignment 작동중");
+    	MeterialEntity data = classService.getMeterialOne(meterialId);
+    	System.out.println(data);
+    	return  ResponseEntity.ok().body(data);
+    }
+
+
 }

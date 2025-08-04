@@ -13,4 +13,5 @@ public class TestSubDTO {
 	private int testnum;//문제번호
 	private String submit;//제출한답
 	private boolean correct;//정답여부
+	private String studId;//푼사람
 }
