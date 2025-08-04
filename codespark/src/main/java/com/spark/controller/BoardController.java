@@ -134,7 +134,7 @@ public class BoardController {
             boardDTO.setUser_id(userId);
             boardDTO.setBoardnum(boardnum);
             
-            BoardDTO createdBoard = boardService.createBoard(boardDTO);
+            BoardDTO createdBoard = boardService.createBoard(boardnum,boardDTO);
             
             return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
         } catch (Exception e) {
@@ -220,7 +220,7 @@ public class BoardController {
             this.totalPage = totalPage;
         }
         
-        // getters and setters
+		// getters and setters
         public boolean isSuccess() { return success; }
         public void setSuccess(boolean success) { this.success = success; }
         

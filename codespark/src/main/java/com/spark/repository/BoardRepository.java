@@ -155,4 +155,32 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
             ORDER BY b.created_at DESC
         """, nativeQuery = true)
         List<Map<String, Object>> searchBoards(@Param("keyword") String keyword);
+
+    @Query(value = """
+    	    SELECT b.*
+    	    FROM board b
+    	    WHERE b.is_active = 1
+    	      AND b.class_id = :classId
+    	      AND b.boardnum = :boardNum
+    	      AND (:search = '' OR b.title LIKE CONCAT('%', :search, '%')
+    	           OR b.content LIKE CONCAT('%', :search, '%'))
+    	    ORDER BY b.created_at DESC
+    	    """, 
+    	    countQuery = """
+    	    SELECT COUNT(*)
+    	    FROM board b
+    	    WHERE b.is_active = 1
+    	      AND b.class_id = :classId
+    	      AND b.boardnum = :boardNum
+    	      AND (:search = '' OR b.title LIKE CONCAT('%', :search, '%')
+    	           OR b.content LIKE CONCAT('%', :search, '%'))
+    	    """,
+    	    nativeQuery = true)
+    	Page<BoardEntity> findBoardsByClassId(
+    	    @Param("classId") String classId,
+    	    @Param("boardNum") String boardNum,
+    	    @Param("search") String search,
+    	    @Param("filterBy") String filterBy,
+    	    Pageable pageable
+    	);
 }

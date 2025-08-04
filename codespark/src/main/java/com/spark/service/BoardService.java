@@ -1,10 +1,14 @@
 package com.spark.service;
 
 import com.spark.Entity.BoardEntity;
+import com.spark.Entity.ClassEntity;
 import com.spark.dto.BoardDTO;
 import com.spark.repository.BoardRepository;
+import com.spark.repository.CourseRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -20,6 +25,9 @@ public class BoardService {
     
     @Autowired
     private BoardRepository boardRepository;
+    
+    @Autowired
+    private CourseRepository courseRepository;
     
     
     //topbar 검색어 관련
@@ -71,18 +79,24 @@ public class BoardService {
     /**
      * 게시글 생성
      */
-    public BoardDTO createBoard(BoardDTO boardDTO) {
+    public BoardDTO createBoard(String classId,BoardDTO boardDTO) {
         // 새 게시글의 ID 생성 (자동 증가)
-        int nextId = getNextBoardId();
-        boardDTO.setBoard_id(nextId);
-        
-        // 조회수 초기화
+        boardDTO.setBoard_id(getNextBoardId());
         boardDTO.setHits(0);
-        
-        
+
         BoardEntity entity = new BoardEntity(boardDTO);
-        BoardEntity savedEntity = boardRepository.save(entity);
-        return entityToDto(savedEntity);
+        return entityToDto(boardRepository.save(entity));
+    }
+    
+    
+    //강의별 게시글 생성
+    public BoardDTO createBoardClassId(String classId,BoardDTO boardDTO) {
+        boardDTO.setBoard_id(getNextBoardId());
+        boardDTO.setHits(0);
+        boardDTO.setClass_id(classId);
+    	
+        BoardEntity entity = new BoardEntity(boardDTO);
+        return entityToDto(boardRepository.save(entity));
     }
     
     /**
@@ -193,4 +207,53 @@ public class BoardService {
         
         return stats;
     }
+
+    public Page<Map<String, Object>> getBoardsByClassId(
+    	    String classId, 
+    	    String boardNum, 
+    	    String search, 
+    	    String filterBy, 
+    	    Pageable pageable) {
+    	    
+    	    try {
+    	        Page<BoardEntity> boardPage = boardRepository.findBoardsByClassId(
+    	            classId, boardNum, search, filterBy, pageable
+    	        );
+    	        
+    	        List<Map<String, Object>> boardList = boardPage.getContent().stream()
+    	            .map(this::convertBoardToMap)
+    	            .collect(Collectors.toList());
+    	        
+    	        return new PageImpl<>(boardList, pageable, boardPage.getTotalElements());
+    	        
+    	    } catch (Exception e) {
+    	        System.err.println("Service - 강의별 게시글 조회 오류: " + e.getMessage());
+    	        throw new RuntimeException("강의별 게시글 조회 실패", e);
+    	    }
+    	}
+		 // BoardService.java에 추가
+		    private Map<String, Object> convertBoardToMap(BoardEntity board) {
+		        Map<String, Object> map = new HashMap<>();
+		        map.put("id", board.getBoardId());
+		        map.put("title", board.getTitle());
+		        map.put("content", board.getContent());
+		        map.put("author", board.getCreateBy());
+		        map.put("createBy", board.getCreateBy());
+		        map.put("createdAt", board.getCreateAt());
+		        map.put("updatedAt", board.getUpdateAt());
+		        map.put("viewCount", board.getHits());
+		        map.put("views", board.getHits());
+		        map.put("hits", board.getHits());
+		        map.put("classId", board.getClassId());
+		        map.put("boardnum", board.getBoardnum());
+		        map.put("userId", board.getUserId());
+		        map.put("file", board.getFile());
+		        map.put("isActive", board.getIsActive());
+		        
+		        // 고정 게시글 여부 (필요시 로직 추가)
+		        map.put("isPinned", false);
+		        map.put("pinned", false);
+		        
+		        return map;
+		    }
 }
