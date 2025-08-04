@@ -2,6 +2,7 @@ package com.spark.repository;
 
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
@@ -82,4 +83,26 @@ public interface CodingRepository extends JpaRepository<CodingEntity,Integer> {
     List<CodingEntity> findRecentProblems(Pageable pageable);
 
 	Optional<CodingEntity> findByCodeIdAndIsActive(int codeId, int i);
+
+	@Query(value = """
+			SELECT
+			    c.code_id as id,
+			    'coding' as type,
+			    c.question as question,
+			    c.level as level,
+			    c.title as title,
+			    c.language as language,
+			    DATE_FORMAT(c.create_at, '%Y-%m-%d') as date,
+			    SUBSTRING(c.question, 1, 100) as excerpt,
+			    c.type as problem_type,
+			    c.filed as field
+			FROM coding c
+			WHERE c.is_active = 1
+			  AND (c.title LIKE CONCAT('%', ?1, '%')
+			       OR c.language LIKE CONCAT('%', ?1, '%')
+			       OR c.question LIKE CONCAT('%', ?1, '%')
+			       OR c.filed LIKE CONCAT('%', ?1, '%'))
+			ORDER BY c.create_at DESC
+			""", nativeQuery = true)
+			List<Map<String, Object>> searchCoding(@Param("keyword") String keyword);
 }

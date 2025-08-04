@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
@@ -134,4 +135,24 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     
     @Query("SELECT b FROM BoardEntity b WHERE b.boardnum = :boardnum AND b.boardId < :boardId ORDER BY b.boardId DESC")
     List<BoardEntity> findPrevBoard(@Param("boardnum") String boardnum, @Param("boardId") int boardId);
+
+    @Query(value = """
+            SELECT 
+                b.board_id as id,
+                'board' as type,
+                b.title as title,
+                u.name as author,
+                b.boardnum as boardType,
+                DATE_FORMAT(b.created_at, '%Y-%m-%d') as date,
+                b.hits as views,
+                0 as replies,
+                SUBSTRING(b.content, 1, 100) as excerpt
+            FROM board b 
+            JOIN user u ON b.user_id = u.user_id 
+            WHERE b.title LIKE CONCAT('%', :keyword, '%') 
+               OR b.content LIKE CONCAT('%', :keyword, '%')
+               OR u.name LIKE CONCAT('%', :keyword, '%')
+            ORDER BY b.created_at DESC
+        """, nativeQuery = true)
+        List<Map<String, Object>> searchBoards(@Param("keyword") String keyword);
 }
