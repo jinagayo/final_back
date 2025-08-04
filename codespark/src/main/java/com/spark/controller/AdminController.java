@@ -472,12 +472,7 @@ public class AdminController {
         @RequestParam String q,
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "10") int limit
-    ) {
-        // 🔥 로그 추가
-        System.out.println("=== SearchController 진입 ===");
-        System.out.println("검색어: " + q);
-        System.out.println("limit: " + limit);
-        
+    ) { 
         try {
             if (q == null || q.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -485,10 +480,6 @@ public class AdminController {
             }
             
             Map<String, Object> result = searchService.searchData(q.trim(), page, limit);
-            
-            // 🔥 결과 로그
-            System.out.println("검색 결과: " + result);
-            
             return ResponseEntity.ok(result);
             
         } catch (Exception e) {

@@ -65,24 +65,28 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
 	
 	
     //검색
-	@Query(value = """
-	        (SELECT 
-	            c.course_id as id, 'course' as type, c.course_title as title,
-	            u.user_name as instructor, c.course_rating as rating
-	        FROM course c JOIN user u ON c.user_id = u.user_id 
-	        WHERE c.course_title LIKE CONCAT('%', :keyword, '%') 
-	           OR u.user_name LIKE CONCAT('%', :keyword, '%')
-	        )
-	        UNION ALL
-	        (SELECT 
-	            u.user_id as id, 'instructor' as type, u.user_name as title,
-	            u.user_speciality as instructor, null as rating
-	        FROM user u 
-	        WHERE u.user_role = 'INSTRUCTOR'
-	          AND u.user_name LIKE CONCAT('%', :keyword, '%')
-	        )
-	        ORDER BY type, title
-	    """, nativeQuery = true)
-	    List<Map<String, Object>> searchAll(@Param("keyword") String keyword);
+    @Query(value = """
+			SELECT
+			    c.class_id as id,
+			    'class' as type,
+			    c.name as title,
+			    c.price as price,
+			    c.intro as intro,
+			    DATE_FORMAT(c.created_at, '%Y-%m-%d') as date,
+			    SUBSTRING(c.detail, 1, 100) as excerpt,
+			    c.mark as rating,
+			    c.state as state,
+			    c.img as image,
+			    u.name as teacher_name
+			FROM class c
+			LEFT JOIN user u ON c.teach_id = u.user_id
+			WHERE c.is_active = true
+			  AND (c.name LIKE CONCAT('%', ?1, '%')
+			       OR c.detail LIKE CONCAT('%', ?1, '%')
+			       OR c.intro LIKE CONCAT('%', ?1, '%')
+			       OR u.name LIKE CONCAT('%', ?1, '%'))
+			ORDER BY c.created_at DESC
+        """, nativeQuery = true)
+	List<Map<String, Object>> searchClasses(@Param("keyword") String keyword);
 
 }
