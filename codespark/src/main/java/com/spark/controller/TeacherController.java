@@ -154,9 +154,9 @@ public class TeacherController {
         return ResponseEntity.ok("");
     }
     //과제물 리스트 불러오기
-	@GetMapping("/material/submissions")
-	public ResponseEntity<?> materialsubmissions(@RequestParam("meterial_id") String meterialId){
-		System.out.println("materialsubmissions 작동중"+meterialId);
+	@GetMapping("/AssignmentList")
+	public ResponseEntity<?> AssignmentList(@RequestParam("meterial_id") String meterialId){
+		System.out.println("AssignmentList 작동중"+meterialId);
 		List<MeterialSubEntity> list = classService.getMeterialSub(Integer.parseInt(meterialId));
 		for(MeterialSubEntity l : list) System.out.println(l);
 		return ResponseEntity.ok().body(list);
