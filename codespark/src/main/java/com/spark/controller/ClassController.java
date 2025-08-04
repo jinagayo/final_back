@@ -56,6 +56,9 @@ public class ClassController {
         String id = (String)session.getAttribute("login");
         //수업 정보
         ClassInfoDTO classDto = classService.getClass(classId);
+        if (classDto == null) {
+            return ResponseEntity.status(404).body("강의 정보를 찾을 수 없습니다.");
+        }
         //수업자료
         List<MeterialEntity> meterial = classService.getMeterials(Integer.parseInt(classId));
         for(MeterialEntity m : meterial)System.out.println(m);

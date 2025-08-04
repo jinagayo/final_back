@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.spark.Entity.MeterialEntity;
+import com.spark.dto.MeterialDTO;
 
 
 public interface MeterialRepository extends JpaRepository<MeterialEntity, Integer>{

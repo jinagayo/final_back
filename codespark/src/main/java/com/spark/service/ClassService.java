@@ -1,8 +1,11 @@
 package com.spark.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -64,7 +67,8 @@ public class ClassService {
     private AttRepository attRepo;
     @Autowired
     private TestRepository testRepo;
-    
+
+
     ClassService(CourseRepository courseRepo) {
         this.courseRepo = courseRepo;
     }
@@ -77,6 +81,7 @@ public class ClassService {
 	}
 	public ClassInfoDTO getClass(String class_id) {
 		ClassInfoDTO data = courseRepo.findClassInfo(class_id);
+		  if (data == null) return null;
 		data.setQnaCount(qnaRepo.countByClassId(Integer.parseInt(class_id)));
 		data.setLectureCount(lectureRepo.countByClassId(Integer.parseInt(class_id)));
 		data.setStudentCount(attRepo.countByClassId(Integer.parseInt(class_id)));
@@ -90,6 +95,7 @@ public class ClassService {
 		return attRepo.findAttId(stuId,classId);
 	}
 	public Boolean reviewYN(Integer attId) {
+		if (attId == null) return false;  // null이면 리뷰 없음 취급
 		List<SubjectReviewEntity> entity = subjectReviewRepo.findByAttId(attId);
 		System.out.println("================================\n"+entity);
 		if(entity.isEmpty()) {
@@ -216,7 +222,40 @@ public class ClassService {
 	}
 
 
-
-
+	public List<MeterialDTO> getLecturesWithProgress(int classId, String studentId) {
+		//1. 전체 강의 목록 조회
+		List<MeterialEntity> lectures = meterialRepo.findByClassId(classId);
+		
+		//2. 강의 id 리스트 뽑기
+		List<Integer> meterIds = lectures.stream()
+				.map(MeterialEntity::getMeterId)
+				.collect(Collectors.toList());
+		
+		// 엔티티 -> DTO 변환
+		List<MeterialDTO> lecturesDTO = lectures.stream()
+				.map(entity -> {
+					MeterialDTO dto = new MeterialDTO();
+					BeanUtils.copyProperties(entity, dto);
+					return dto;
+				})
+				.collect(Collectors.toList());
+		
+		//3. 해당 학생의 각 강의별 progress를 Map으로 한번에 조회
+		List<Object[]> progressList = meterialSubRepo.findProgressByStudentAndMeterIds(studentId, meterIds);
+		Map<Integer, Integer> progressMap = new HashMap<>();
+		for(Object[] row : progressList) {
+		    Integer meterId = ((Number) row[0]).intValue();
+		    Integer progress = ((Number) row[1]).intValue();
+		    progressMap.put(meterId, progress);
+		}
+		
+		//4. lectures에 progress 값 주입
+		for(MeterialDTO dto : lecturesDTO) {
+			int progress = progressMap.getOrDefault(dto.getMeterId(), 0);
+			dto.setProgress(progress);
+		}
+		
+		return lecturesDTO;
+	}
 
 }

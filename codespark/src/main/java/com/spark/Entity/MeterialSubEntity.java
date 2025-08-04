@@ -40,4 +40,6 @@ public class MeterialSubEntity {
 		this.progress = dto.getProgress();
 		this.stdId = dto.getStdId();
 	}
+
+
 }

@@ -1,6 +1,7 @@
 package com.spark.repository;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -21,4 +22,15 @@ public interface MeterialSubRepository  extends JpaRepository<MeterialSubEntity,
 	 
 	 List<MeterialSubEntity> findByMeterialId(Integer metId);
 
+
+	@Query("SELECT m.meterId, COALESCE(s.progress,0)" + 
+			"FROM MeterialSubEntity s "+ 
+			"RIGHT JOIN MeterialEntity m ON s.meterialId = m.meterId " + 
+			"AND s.stdId = :stdId " +
+			"WHERE m.meterId IN :meterId")
+	List<Object[]> findProgressByStudentAndMeterIds(
+			@Param("stdId") String studentId, 
+			@Param("meterId") List<Integer> meterIds);
+					
+					
 }

@@ -52,4 +52,8 @@ public class ClassInfoDTO {
 	this.createdBy=createdBy;
 
 	}
+
+	public ClassInfoDTO() {
+		// TODO Auto-generated constructor stub
+	}
 }
