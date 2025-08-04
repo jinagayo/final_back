@@ -20,7 +20,7 @@ public class ProfileUpdateDTO {
     
     private String addressnum;
     
-    private Date birthday;
+    private String birthday;
     
     @Pattern(regexp = "^010-\\d{4}-\\d{4}$|^[0-9-]+$", message = "전화번호 형식이 올바르지 않습니다.")
     private String phone;

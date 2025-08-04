@@ -1,6 +1,7 @@
 package com.spark.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +17,8 @@ public interface MeterialSubRepository  extends JpaRepository<MeterialSubEntity,
 
 	 MeterialSubEntity findByMeterialIdAndStdId(int meterialId, String stdId);
 
+	Optional<MeterialSubEntity> findByMeterialIdAndStdId(Integer meterialId, String studentId);
 	 
 	 List<MeterialSubEntity> findByMeterialId(Integer metId);
+
 }

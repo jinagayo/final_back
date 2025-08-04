@@ -58,10 +58,7 @@ public class ClassEntity {
 	
 	@Column(name = "img")
 	private String img; //대표이미지
-
-	private int lectureCount;
-	private int qnaCount;
-	private int studentCount; 
+ 
 
 	@Column(name="state")
 	private String state;

@@ -48,7 +48,7 @@ public class UserEntity {
 	private String addressnum;//우편번호
 	
 	@Column(nullable = false,name="birthday")
-	private Date birthday;//생년월일
+	private String birthday;//생년월일
 	
 	@Column(nullable = true,unique = true,name="phone")
 	private String phone;//전화번호

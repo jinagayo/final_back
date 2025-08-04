@@ -13,7 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -21,6 +23,7 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
@@ -47,11 +50,12 @@ public class S3Service {
 	
 	
 	public String upload(MultipartFile file, String folderName) throws IOException{
-		String key = folderName + "/main.png"; // ← 이름을 고정시킴
-		 
+		
 		String originalFilename = file.getOriginalFilename();
 		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-		String fileName = UUID.randomUUID() + extension;
+	    // 랜덤 파일명(중복 방지)
+	    String uuid = UUID.randomUUID().toString();
+	    String key = folderName + "/" + uuid + extension;
 
 		
 		PutObjectRequest putRequest = PutObjectRequest.builder()
@@ -64,7 +68,7 @@ public class S3Service {
 	
 			return key;
 	}
-	
+	//이미지/영상 업로드 용도
 	public String generatePresignedUploadUrl(String fileName) {
 		S3Presigner presigner = S3Presigner.builder()
 				.region(Region.AP_NORTHEAST_2)
@@ -87,6 +91,7 @@ public class S3Service {
 		        return presigner.presignPutObject(presignRequest).url().toString();
 		    }
 
+		//이미지/영상/자료 다운로드·스트리밍 용도
 		    public String generatePresignedReadUrl(String fileName){
 		        GetObjectRequest objectRequest = GetObjectRequest.builder()
 		            .bucket(bucketName)
@@ -133,4 +138,5 @@ public class S3Service {
 		    	}
 		    	return tempFile;
 }
+		
 }

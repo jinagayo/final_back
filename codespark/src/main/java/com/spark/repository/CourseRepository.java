@@ -67,7 +67,7 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
 	List<ClassInfoDTO> findAllRequest();
 	//관리자 입장에서 강의 목록 조회
 	@Query(value = "SELECT c.class_id as classId, c.name as name, c.detail as detail, c.price as price, c.intro as intro, c.mark as mark, c.img as img, u.name as teacher, "
-			+ "com.name as subject, c.state as state, c.created_at as createdAt, c.updated_at as updatedAt,  c.created_by as createdBy, c.updated_by as updatedBy  " + 
+			+ "com.name as subject, c.state as state, c.created_at as createdAt, c.updated_at as updatedAt,  c.created_by as createdBy, c.updated_by as updatedBy " + 
             "FROM `class` c JOIN `user` u ON c.teach_id = u.user_id JOIN `common` com ON c.sub_id = com.com_id where c.class_id=:classId",
     	    nativeQuery = true)
 	ClassInfoDTO findClassInfo(@Param("classId") String classId);
@@ -84,6 +84,29 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
 	List<Map<String, Object>> getMyClass(@Param("id") String id);
 	 
 	
-
+    //검색
+    @Query(value = """
+			SELECT
+			    c.class_id as id,
+			    'class' as type,
+			    c.name as title,
+			    c.price as price,
+			    c.intro as intro,
+			    DATE_FORMAT(c.created_at, '%Y-%m-%d') as date,
+			    SUBSTRING(c.detail, 1, 100) as excerpt,
+			    c.mark as rating,
+			    c.state as state,
+			    c.img as image,
+			    u.name as teacher_name
+			FROM class c
+			LEFT JOIN user u ON c.teach_id = u.user_id
+			WHERE c.is_active = true
+			  AND (c.name LIKE CONCAT('%', ?1, '%')
+			       OR c.detail LIKE CONCAT('%', ?1, '%')
+			       OR c.intro LIKE CONCAT('%', ?1, '%')
+			       OR u.name LIKE CONCAT('%', ?1, '%'))
+			ORDER BY c.created_at DESC
+        """, nativeQuery = true)
+	List<Map<String, Object>> searchClasses(@Param("keyword") String keyword);
 
 }
