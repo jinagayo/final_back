@@ -64,8 +64,6 @@ public class MyPageController {
 	@Autowired
 	private BoardService boardService;
 	
-	@Autowired
-	private S3Service s3Service;
     
 	@GetMapping("Profile")
 	public ResponseEntity<UserEntity> profile(HttpSession session){

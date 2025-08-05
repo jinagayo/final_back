@@ -1,9 +1,13 @@
 package com.spark.repository;
 
 import com.spark.Entity.BoardEntity;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,22 +18,23 @@ import java.util.Map;
 @Repository
 public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     
-    /**
-     * 게시판 번호로 게시글 조회 (페이징)
-     */
-    Page<BoardEntity> findByBoardnum(String boardnum, Pageable pageable);
-    
-    /**
-     * 게시판 번호와 제목/내용 검색 (페이징)
-     */
-    @Query("SELECT b FROM BoardEntity b WHERE b.boardnum = :boardnum AND " +
-           "(LOWER(b.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-           "LOWER(b.content) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<BoardEntity> findByBoardnumAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-        @Param("boardnum") String boardnum, 
-        @Param("search") String titleSearch, 
-        @Param("search") String contentSearch, 
-        Pageable pageable);
+	/**
+	 * 게시판 번호로 게시글 조회 (class_id가 NULL인 것만, 페이징)
+	 */
+	@Query("SELECT b FROM BoardEntity b WHERE b.boardnum = :boardnum AND b.classId IS NULL")
+	Page<BoardEntity> findByBoardnum(@Param("boardnum") String boardnum, Pageable pageable);
+
+	/**
+	 * 게시판 번호와 제목/내용 검색 (class_id가 NULL인 것만, 페이징)
+	 */
+	@Query("SELECT b FROM BoardEntity b WHERE b.boardnum = :boardnum AND b.classId IS NULL AND " +
+	       "(LOWER(b.title) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+	       "LOWER(b.content) LIKE LOWER(CONCAT('%', :search, '%')))")
+	Page<BoardEntity> findByBoardnumAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+	    @Param("boardnum") String boardnum, 
+	    @Param("search") String titleSearch, 
+	    @Param("search") String contentSearch, 
+	    Pageable pageable);
     
     /**
      * 게시판 번호와 사용자 ID로 게시글 조회 (페이징)
@@ -183,4 +188,17 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     	    @Param("filterBy") String filterBy,
     	    Pageable pageable
     	);
+    
+    //강의별 게시판 글 작성
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO board (board_id, title, boardnum, user_id, content, class_id, hits, is_active, created_at) " +
+                   "VALUES (:boardId, :title, :boardnum, :userId, :content, :classId, 0, 1, NOW())", 
+           nativeQuery = true)
+    void insertBoardSimple(@Param("boardId") int boardId,
+                          @Param("title") String title,
+                          @Param("boardnum") String boardnum,
+                          @Param("userId") String userId,
+                          @Param("content") String content,
+                          @Param("classId") String classId);
 }

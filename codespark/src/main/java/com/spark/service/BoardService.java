@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,21 +40,21 @@ public class BoardService {
      * 게시판 목록 조회 (검색, 페이징 포함)
      */
     @Transactional(readOnly = true)
-    public Page<BoardDTO> getBoardList(String boardnum, String search, Pageable pageable) {
-        Page<BoardEntity> entityPage;
-        
-        // 검색어가 있는 경우
-        if (search != null && !search.trim().isEmpty()) {
-            search = search.trim();
-            entityPage = boardRepository.findByBoardnumAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
-                boardnum, search, search, pageable);
-        } else {
-            // 검색어가 없는 경우
-            entityPage = boardRepository.findByBoardnum(boardnum, pageable);
-        }
-        
-        // Entity를 DTO로 변환
-        return entityPage.map(this::entityToDto);
+    public Page<BoardDTO> getBoardList(String classId,String boardnum, String search, Pageable pageable) {
+    Page<BoardEntity> entityPage;
+
+    // 검색어가 있는 경우
+    if (search != null && !search.trim().isEmpty()) {
+    search = search.trim();
+    entityPage = boardRepository.findByBoardnumAndTitleContainingIgnoreCaseOrContentContainingIgnoreCase(
+    boardnum, search, search, pageable);
+    } else {
+    // 검색어가 없는 경우
+    entityPage = boardRepository.findByBoardnum(boardnum, pageable);
+    }
+
+    // Entity를 DTO로 변환
+    return entityPage.map(this::entityToDto);
     }
     
     /**
@@ -90,13 +91,26 @@ public class BoardService {
     
     
     //강의별 게시글 생성
-    public BoardDTO createBoardClassId(String classId,BoardDTO boardDTO) {
-        boardDTO.setBoard_id(getNextBoardId());
-        boardDTO.setHits(0);
+    public BoardDTO createBoardClassId(String classId, BoardDTO boardDTO) {
+        int boardId = getNextBoardId();
+        boardDTO.setBoard_id(boardId);
         boardDTO.setClass_id(classId);
-    	
-        BoardEntity entity = new BoardEntity(boardDTO);
-        return entityToDto(boardRepository.save(entity));
+        
+        System.out.println("BoardDTO boardNum: " + boardDTO.getBoardnum());
+        
+        // 직접 INSERT
+        boardRepository.insertBoardSimple(
+            boardId,
+            boardDTO.getTitle(),
+            boardDTO.getBoardnum(),  // "BOD001" 그대로 저장됨
+            boardDTO.getUser_id(),
+            boardDTO.getContent(),
+            classId
+        );
+        
+        // 저장된 데이터 조회해서 반환
+        BoardEntity savedEntity = boardRepository.findById(boardId).orElse(null);
+        return entityToDto(savedEntity);
     }
     
     /**
@@ -114,6 +128,9 @@ public class BoardService {
         return entityToDto(savedEntity);
     }
     
+    public BoardDTO getBoardByclassId(int boardId) {
+        return getBoardById(boardId); // 기존 메서드 재사용
+    }
     /**
      * 게시글 삭제
      */
@@ -207,53 +224,106 @@ public class BoardService {
         
         return stats;
     }
+    
+    //강의별 게시판 조회
+    public Page<Map<String, Object>> getBoardsByClassId(String classId, String boardNum, String search, String filterBy, Pageable pageable) {
+        try {
+            
+            Page<BoardEntity> boardPage = boardRepository.findBoardsByClassId(classId, boardNum, search, filterBy, pageable);
+            
+            List<Map<String, Object>> boardList = boardPage.getContent().stream()
+                .map(this::convertBoardToMap)
+                .collect(Collectors.toList());
+            
+            return new PageImpl<>(boardList, pageable, boardPage.getTotalElements());
+            
+        } catch (Exception e) {
+            System.err.println("Service - 강의별 게시글 조회 오류: " + e.getMessage());
+            throw new RuntimeException("강의별 게시글 조회 실패", e);
+        }
+    }
+		 
+ // 강의별 게시판 수정
+//    public BoardDTO getBoardByclassId(int boardId) {
+//        BoardEntity entity = boardRepository.findById(boardId)
+//            .orElse(null);
+//        
+//        if (entity == null) {
+//            return null;
+//        }
+//        
+//        return entityToDto(entity);
+//    }
+    
+    public BoardDTO updateBoardByClassId(BoardDTO boardDTO) {
+        // 1. 기존 엔티티 조회
+        BoardEntity existingEntity = boardRepository.findById(boardDTO.getBoard_id())
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + boardDTO.getBoard_id()));
 
-    public Page<Map<String, Object>> getBoardsByClassId(
-    	    String classId, 
-    	    String boardNum, 
-    	    String search, 
-    	    String filterBy, 
-    	    Pageable pageable) {
-    	    
-    	    try {
-    	        Page<BoardEntity> boardPage = boardRepository.findBoardsByClassId(
-    	            classId, boardNum, search, filterBy, pageable
-    	        );
-    	        
-    	        List<Map<String, Object>> boardList = boardPage.getContent().stream()
-    	            .map(this::convertBoardToMap)
-    	            .collect(Collectors.toList());
-    	        
-    	        return new PageImpl<>(boardList, pageable, boardPage.getTotalElements());
-    	        
-    	    } catch (Exception e) {
-    	        System.err.println("Service - 강의별 게시글 조회 오류: " + e.getMessage());
-    	        throw new RuntimeException("강의별 게시글 조회 실패", e);
-    	    }
-    	}
-		 // BoardService.java에 추가
-		    private Map<String, Object> convertBoardToMap(BoardEntity board) {
-		        Map<String, Object> map = new HashMap<>();
-		        map.put("id", board.getBoardId());
-		        map.put("title", board.getTitle());
-		        map.put("content", board.getContent());
-		        map.put("author", board.getCreateBy());
-		        map.put("createBy", board.getCreateBy());
-		        map.put("createdAt", board.getCreateAt());
-		        map.put("updatedAt", board.getUpdateAt());
-		        map.put("viewCount", board.getHits());
-		        map.put("views", board.getHits());
-		        map.put("hits", board.getHits());
-		        map.put("classId", board.getClassId());
-		        map.put("boardnum", board.getBoardnum());
-		        map.put("userId", board.getUserId());
-		        map.put("file", board.getFile());
-		        map.put("isActive", board.getIsActive());
-		        
-		        // 고정 게시글 여부 (필요시 로직 추가)
-		        map.put("isPinned", false);
-		        map.put("pinned", false);
-		        
-		        return map;
-		    }
+        // 2. 디버깅 출력 (기존 값 확인)
+        System.out.println("수정 전 classId: " + existingEntity.getClassId());
+
+        // 3. 수정할 필드만 변경 (null 체크 필요 시 if문 추가 가능)
+        existingEntity.setTitle(boardDTO.getTitle());
+        existingEntity.setContent(boardDTO.getContent());
+        existingEntity.setFile(boardDTO.getFile());
+        existingEntity.setUpdateAt(new Date());
+        existingEntity.setUpdateBy(boardDTO.getUpdated_by());
+
+        // 4. classId는 DTO에 값이 있는 경우에만 업데이트
+        if (boardDTO.getClass_id() != null) {
+            existingEntity.setClassId(boardDTO.getClass_id());
+        }
+
+        // 5. 저장
+        BoardEntity savedEntity = boardRepository.save(existingEntity);
+
+        // 6. 디버깅 출력 (변경 후 확인)
+        System.out.println("수정 후 classId: " + savedEntity.getClassId());
+
+        // 7. DTO 변환 후 반환
+        return entityToDto(savedEntity);
+    }
+    
+    private Map<String, Object> convertBoardToMap(BoardEntity board) {
+    	Map<String, Object> map = new HashMap<>();
+        map.put("id", board.getBoardId());
+        map.put("title", board.getTitle());
+        map.put("content", board.getContent());
+        map.put("author", board.getCreateBy());
+		map.put("createBy", board.getCreateBy());
+		map.put("createdAt", board.getCreateAt());
+		map.put("updatedAt", board.getUpdateAt());
+		map.put("viewCount", board.getHits());
+		map.put("views", board.getHits());
+		map.put("hits", board.getHits());
+		map.put("classId", board.getClassId());
+		map.put("boardnum", board.getBoardnum());
+		map.put("userId", board.getUserId());
+		map.put("file", board.getFile());
+		map.put("isActive", board.getIsActive());
+        
+		// 고정 게시글 여부 (필요시 로직 추가)
+		map.put("isPinned", false);
+		map.put("pinned", false);
+		return map;
+    }
+
+    public void deleteBoardByClassId(String classId, int boardId, String userId) {
+        BoardEntity board = boardRepository.findById(boardId)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + boardId));
+        
+        if (!userId.equals(board.getUserId())) {
+            throw new RuntimeException("삭제 권한이 없습니다. 작성자만 삭제할 수 있습니다.");
+        }
+        
+        if (!classId.equals(board.getClassId())) {
+            throw new RuntimeException("해당 강의의 게시글이 아닙니다.");
+        }
+        
+        boardRepository.deleteById(boardId);
+        
+        System.out.println("게시글 삭제 완료 - boardId: " + boardId + ", userId: " + userId);
+    }
+
 }
