@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.SubjectReviewEntity;
 import com.spark.Entity.TestEntity;
+import com.spark.Entity.TestSubEntity;
 import com.spark.Entity.UserEntity;
 import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
@@ -181,10 +183,48 @@ public class TeacherController {
 			UserEntity student = userService.UserProfile(e.getStdId());
 			map.put("student", student.getName());
 			map.put("score", e.getContent());
+			map.put("subId", e.getMetersubId());
 			list.add(map);
 		}
 		data.put("submit",list);
 		System.out.println(data);
 		return ResponseEntity.ok().body(data);
 	}
+	
+    @GetMapping("/testDetail")
+    public ResponseEntity<?> testDetail(@RequestParam("meterialSub_id") String meteriaSublId) {
+    	System.out.println("testDetail 작동중");
+    	Map<String,Object> data = new HashMap<>();
+    	//Meterial_sub 가져오기
+    	MeterialSubEntity metsub= classService.getMeterialSubOne(meteriaSublId).get();
+    	String meterialId = String.format("%d", metsub.getMeterialId());
+    	System.out.println("meterialId :"+meterialId);
+    	//테스트정보
+    	MeterialEntity metEntity= classService.getMeterialOne(meterialId);
+    	data.put("title", metEntity.getTitle());
+    	data.put("content", metEntity.getContent());
+    	System.out.println("data :"+data);
+    	//시험점수
+    	data.put("score", metsub.getContent());
+    	//문제정보
+    	List<Map<String,Object>> questions = new ArrayList<>();
+    	List<TestEntity> testEntity = classService.getTest(meterialId);
+    	for(TestEntity t :testEntity) {
+    		Map<String,Object> map = new HashMap<>();
+    		map.put("question", t.getQuestion());
+    		map.put("answer", t.getAnswer());
+    		map.put("choice1", t.getChoice1());
+    		map.put("choice2", t.getChoice2());
+    		map.put("choice3", t.getChoice3());
+    		map.put("choice4", t.getChoice4());
+    		TestSubEntity sub = classService.getTestSub(String.format("%d", t.getTestId()),metsub.getStdId());
+    		map.put("submit", sub.getSubmit());
+    		map.put("correct", sub.isCorrect());
+    		questions.add(map);
+    	}
+    	data.put("questions", questions);
+    	System.out.println("data :"+data);
+        return ResponseEntity.ok().body(data);
+    }
+    
 }

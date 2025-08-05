@@ -276,6 +276,18 @@ public class ClassService {
 	}
 
 
+	public Optional<MeterialSubEntity> getMeterialSubOne(String meteriaSublId) {
+		// TODO Auto-generated method stub
+		return meterialSubRepo.findById(Integer.parseInt(meteriaSublId));
+	}
+
+
+	public TestSubEntity getTestSub(String meteriaSublId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 
 
 
