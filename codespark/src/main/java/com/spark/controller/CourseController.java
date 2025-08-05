@@ -102,6 +102,7 @@ public class CourseController {
         courseDetail.put("reviews", reviews);
 
         return ResponseEntity.ok(courseDetail);
+
     }
     
     @PostMapping("PaymentUpdate")

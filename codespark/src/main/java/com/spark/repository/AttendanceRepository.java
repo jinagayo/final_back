@@ -25,4 +25,6 @@ public interface AttendanceRepository extends JpaRepository<AttendanceEntity, In
 	Integer countByClassId(@Param("classId") int i);
 
 
+
+
 }
