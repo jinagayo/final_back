@@ -49,4 +49,11 @@ public class MeterialSubService {
 		
 	}
 
+	public MeterialSubEntity updateComment(Integer metersubId, Integer comment) {
+		MeterialSubEntity entity = meterialSubRepository.findById(metersubId)
+				.orElseThrow(() -> new RuntimeException("제출물이 존재하지 않습니다."));
+		entity.setProgress(comment);
+		return meterialSubRepository.save(entity);
+	}
+
 	}
