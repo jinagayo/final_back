@@ -5,6 +5,7 @@ import com.spark.dto.BoardDTO;
 import com.spark.dto.CommentDTO;
 import com.spark.dto.CommentRequestDTO;
 import com.spark.service.BoardService;
+import com.spark.service.CodingService;
 import com.spark.service.CommentService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,12 +29,19 @@ import java.util.Map;
 @RequestMapping("/board")
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class BoardController {
+
+    private final CodingService codingService;
     
     @Autowired
     private BoardService boardService;
     
     @Autowired
     private CommentService commService;
+
+
+    BoardController(CodingService codingService) {
+        this.codingService = codingService;
+    }
     
     
     @GetMapping("/list")
@@ -46,6 +54,14 @@ public class BoardController {
             @RequestParam(value = "filterBy", defaultValue = "all") String filterBy) {
         
         try {
+        	
+        	//topbar 검색어
+        	System.out.println("===게시판 검색 요청");
+        	System.out.println("boardnum" + boardnum);
+        	System.out.println("search" + search);
+        	System.out.println("page" + page);
+        	
+        	
             // 페이지네이션을 위한 Pageable 객체 생성 (0-based indexing)
             Pageable pageable = PageRequest.of(page - 1, size, getSort(sortBy));
             
@@ -128,7 +144,7 @@ public class BoardController {
     }
     
     //게시글 수정
-    @PutMapping("/{boardId}")
+    @PutMapping("/edit/{boardId}")
     public ResponseEntity<ApiResponse> updateBoard(@PathVariable int boardId, @RequestBody BoardDTO boardDTO) {
         try {
             boardDTO.setBoard_id(boardId);

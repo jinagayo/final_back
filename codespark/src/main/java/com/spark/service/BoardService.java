@@ -21,6 +21,12 @@ public class BoardService {
     @Autowired
     private BoardRepository boardRepository;
     
+    
+    //topbar 검색어 관련
+    public List<Map<String, Object>> searchBoards(String keyword, int limit) {
+        return boardRepository.searchBoards(keyword);
+    }
+    
     /**
      * 게시판 목록 조회 (검색, 페이징 포함)
      */

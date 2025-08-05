@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -69,15 +70,29 @@ public class TeacherController {
 		// 로그인 강사 아이디(유니크) 추출
 		String teacherId = principal.getName();
 		
+		
 		  // PageRequest는 0-based이므로 -1
 		  PageRequest pageRequest = PageRequest.of(Math.max(0, page - 1), size, Sort.by(Sort.Direction.DESC,"classId"));
 		  
 		  // 서비스에서 강사의 강의 목록을 조회 (검색 포함)
 		  Page<ClassDTO> pageResult = classService.getCoursesByTeacher(teacherId, search, pageRequest);
-		
+		  
+		// 각 classDTO를 classInfoDTO로 변환하면서 카운트도 넣기 
+			List<ClassInfoDTO> infoList = pageResult.getContent().stream().map(classDto -> {
+				  ClassInfoDTO infoDto = new ClassInfoDTO();
+				
+		 // --- ClassDTO -> ClassInfoDTO 필드 복사
+			BeanUtils.copyProperties(classDto, infoDto);  // 여기서 대부분 값 복사
+			ClassInfoDTO dto = classService.getClass(""+classDto.getClassId());
+			infoDto.setLectureCount(dto.getLectureCount());
+			infoDto.setQnaCount(dto.getQnaCount());
+				
+			return infoDto;
+			}).toList();
+			
 		  //응답 포맷 맞춰서 반환
 		  Map<String, Object> response = new HashMap<>();
-		  response.put("data", pageResult.getContent());
+		  response.put("data", infoList);
 		  response.put("currentPage", pageResult.getNumber() + 1);  //1-based
 		  response.put("totalPages", pageResult.getTotalPages());
 		  response.put("totalElements", pageResult.getTotalElements());
@@ -114,8 +129,10 @@ public class TeacherController {
 	
 	//클래스 강좌 목록
 	@GetMapping("class/{classId}/lectures")
-	public ResponseEntity<?> getLectures(@PathVariable String classId){
-		List<MeterialDTO> lectures = classService.getLectures(Integer.parseInt(classId));
+	public ResponseEntity<?> getLectures(
+			@PathVariable String classId,
+			@RequestParam("studentId") String studentId){
+		List<MeterialDTO> lectures = classService.getLecturesWithProgress(Integer.parseInt(classId),studentId);
 		return ResponseEntity.ok().body(Map.of("data",lectures));
 	}
     @PostMapping("/testmaterial")
