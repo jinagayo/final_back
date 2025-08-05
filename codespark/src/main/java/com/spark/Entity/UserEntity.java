@@ -6,6 +6,7 @@ import java.util.Date;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
+import com.spark.dto.ProfileUpdateDTO;
 import com.spark.dto.UserDTO;
 
 import jakarta.persistence.Column;
@@ -47,7 +48,7 @@ public class UserEntity {
 	private String addressnum;//우편번호
 	
 	@Column(nullable = false,name="birthday")
-	private Date birthday;//생년월일
+	private String birthday;//생년월일
 	
 	@Column(nullable = true,unique = true,name="phone")
 	private String phone;//전화번호
@@ -78,6 +79,20 @@ public class UserEntity {
 
 	
 	public UserEntity(UserDTO dto) {
+		this.userId = dto.getUser_id();
+		this.pw = dto.getPw();
+		this.name = dto.getName();
+		this.address1 = dto.getAddress1();
+		this.address2 = dto.getAddress2();
+		this.addressnum = dto.getAddressnum();
+		this.birthday = dto.getBirthday();
+		this.phone = dto.getPhone();
+		this.position = dto.getPosition();
+		this.email = dto.getEmail();
+		this.img = dto.getImg();
+		this.state = dto.getState();
+	}
+	public UserEntity(ProfileUpdateDTO dto) {
 		this.userId = dto.getUser_id();
 		this.pw = dto.getPw();
 		this.name = dto.getName();

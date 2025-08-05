@@ -21,6 +21,9 @@ public class TestSubEntity {
 	@Column(name = "testnum")
 	private int testnum;//문제번호
 	
+	@Column(name = "stud_id")
+	private String studId;//푼놈
+	
 	@Column(name = "submit")
 	private String submit;//제출한답
 	
@@ -32,5 +35,6 @@ public class TestSubEntity {
 		this.testnum = dto.getTestnum();
 		this.submit = dto.getSubmit();
 		this.correct = dto.isCorrect();
+		this.studId = dto.getStudId();
 	}
 }

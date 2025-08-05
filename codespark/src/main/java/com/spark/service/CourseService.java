@@ -118,9 +118,6 @@ public class CourseService {
 		courseRepo.deleteById(id);
 		
 	}
-
-<<<<<<< Updated upstream
-=======
 	   public List<ClassInfoDTO> getMain() {
 		      List<ClassInfoDTO> allClass=courseRepo.findAllClass();
 		      List<ClassInfoDTO> list = new ArrayList<>();
@@ -129,7 +126,6 @@ public class CourseService {
 		      }
 		      return list;
 		   }
-
 	   public Map<String, Object> getSubjectInfo(String subId) {
 		    try {
 		        // CodeEntity에서 과목 정보 조회
@@ -155,7 +151,6 @@ public class CourseService {
 		        return info;
 		    }
 		}
->>>>>>> Stashed changes
 
 	   public List<Map<String, Object>> getClassesBySubjectId(String subId) {
 		    try {
@@ -179,6 +174,4 @@ public class CourseService {
 		        throw new RuntimeException("과목별 강의 조회 실패", e);
 		    }
 		}
-
-
 }

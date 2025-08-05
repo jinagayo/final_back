@@ -1,25 +1,33 @@
 package com.spark.Entity;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.spark.dto.MeterialDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @Table(name = "meterial")
+@SQLDelete(sql = "UPDATE test SET is_active = false WHERE test_id = ?")
+@Where(clause = "is_active = true")
 @NoArgsConstructor
+@Data
 public class MeterialEntity {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "meter_id")
 	private int meterId;//강의자료id
 	
 	@Column(name = "class_id")
-	private String classId;//강의 코드
+	private int classId;//강의 코드
 	
 	@Column(name = "seq")
 	private int seq;//순서
@@ -31,14 +39,26 @@ public class MeterialEntity {
 	private String type;//종류(영상,과제)
 	
 	@Column(name = "time")
-	private int time;//동영상길이
+
+	private Integer  time;//동영상길이
+
+	
+	@Column(name = "title")
+	private String title;//제목
+
+	@Column(name = "detail")
+	private String detail;
+
+
 	
 	public MeterialEntity(MeterialDTO dto) {
-		this.meterId = dto.getMeter_id();
-		this.classId = dto.getClass_id();
+		this.meterId = dto.getMeterId();
+		this.classId = dto.getClassId();
 		this.seq = dto.getSeq();
 		this.content = dto.getContent();
 		this.type = dto.getType();
 		this.time = dto.getTime();
+		this.title = dto.getTitle();
+		this.detail = dto.getDetail(); 
 	}
 }

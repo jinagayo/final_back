@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.spark.service.BoardService;
 import com.spark.service.ClassService;
 import com.spark.service.CourseService;
@@ -72,6 +71,10 @@ public class ClassController {
         String id = (String)session.getAttribute("login");
         //수업 정보
         ClassInfoDTO classDto = classService.getClass(classId);
+       
+        if (classDto == null) {
+            return ResponseEntity.status(404).body("강의 정보를 찾을 수 없습니다.");
+        }
         //수업자료
         List<MeterialEntity> meterial = classService.getMeterials(Integer.parseInt(classId));
         for(MeterialEntity m : meterial)System.out.println(m);

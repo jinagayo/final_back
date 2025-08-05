@@ -27,11 +27,8 @@ public class ClassDTO {
 	private String state;//강의 승인 반려 대기 여부
 	private String updatedBy;
 	private String createdBy;
-	private Timestamp   createdAt;
-	private Timestamp   updatedAt;
-
-	private int lectureCount;  //강의수
-	private int qnaCount;    //qna개수
+	private Timestamp createdAt;
+	private Timestamp updatedAt;
 	
 	public static ClassDTO fromEntity(ClassEntity entity) {
 		ClassDTO dto = new ClassDTO();

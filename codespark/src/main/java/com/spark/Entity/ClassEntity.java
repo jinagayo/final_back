@@ -58,7 +58,8 @@ public class ClassEntity {
 	
 	@Column(name = "img")
 	private String img; //대표이미지
-	
+ 
+
 	@Column(name="state")
 	private String state;
 	
