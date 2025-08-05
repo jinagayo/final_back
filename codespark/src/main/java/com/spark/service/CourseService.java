@@ -126,6 +126,15 @@ public class CourseService {
 		      return list;
 		   }
 
+	   public boolean isTaking(String id, String classId) {
+		Integer attendance = attendRepo.findAttId(id,classId);
+		if(attendance==null) {
+			return false;
+			
+		}
+		return true;
+	   }
+
 
 
 

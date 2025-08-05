@@ -53,10 +53,17 @@ public class CourseController {
         return courseService.getCourses(classId);
     }
     @GetMapping("Payment")
-    public ResponseEntity<?> CoursesPay(@RequestParam("class_id") String classId) {
+    public ResponseEntity<?> CoursesPay(@RequestParam("class_id") String classId,HttpSession session) {
+        String id = (String)session.getAttribute("login");
     	System.out.println("페이 컨트롤러 작동중");
+    	if(courseService.isTaking(id,classId)) {
+    		return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("이미 수강중인 강의입니다.");
+    	}
     	
-        return courseService.getCourses(classId);
+    	return courseService.getCourses(classId);
+
     }
     
     @PostMapping("PaymentUpdate")
