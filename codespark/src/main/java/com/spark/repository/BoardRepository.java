@@ -192,13 +192,14 @@ public interface BoardRepository extends JpaRepository<BoardEntity, Integer> {
     //강의별 게시판 글 작성
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO board (board_id, title, boardnum, user_id, content, class_id, hits, is_active, created_at) " +
-                   "VALUES (:boardId, :title, :boardnum, :userId, :content, :classId, 0, 1, NOW())", 
+    @Query(value = "INSERT INTO board (board_id, title, boardnum, user_id, content, class_id, file, hits, is_active, created_at) " +
+                   "VALUES (:boardId, :title, :boardnum, :userId, :content, :classId, :file, 0, 1, NOW())", 
            nativeQuery = true)
     void insertBoardSimple(@Param("boardId") int boardId,
                           @Param("title") String title,
                           @Param("boardnum") String boardnum,
                           @Param("userId") String userId,
                           @Param("content") String content,
-                          @Param("classId") String classId);
+                          @Param("classId") String classId,
+                          @Param("file") String file);
 }

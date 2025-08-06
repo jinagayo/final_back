@@ -62,8 +62,6 @@ public class TeacherController {
     @Autowired
     private MeterialRepository meterialRepo;
 	@Autowired
-	public UserService userService;
-	@Autowired
 	public MeterialSubService meterialSubService;
 	@Autowired
 	public MeterialService meterialService;

@@ -267,9 +267,9 @@ public class ClassService {
 	}
 
 
-	public MeterialSubEntity getMeterialSubOne(String meterialId, String id) {
+	public List<MeterialSubEntity> getMeterialSubOne(String meterialId, String id) {
 		List<MeterialSubEntity> entity = meterialSubRepo.testYN(meterialId,id);
-		return entity.get(0);
+		return entity;
 	}
 
 
@@ -330,6 +330,18 @@ public class ClassService {
 	}
 
 
+
+	public Object studentDidIt(List<MeterialSubEntity> sub, MeterialEntity m) {
+		if(sub==null) {
+			return false;
+		}else { //sub가 있는 경우
+			if(m.getType().equals("MET001")) {//동영상인 경우
+				if(sub.get(0).getProgress()>=80) { //80 이상 들었을때
+					return true;
+				}else return false; //80 이하
+			}else return true; //동영상이 아닌 경우
+		}
+		
 	public void updateClass(String classId, ClassInfoDTO dto) {
 		//1. 해당 강의 엔티티 조회
 		Optional<ClassEntity> optionalEntity = courseRepo.findById(Integer.parseInt(classId));
