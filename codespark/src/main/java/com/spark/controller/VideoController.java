@@ -38,6 +38,7 @@ import com.spark.repository.MeterialSubRepository;
 import com.spark.repository.UserRepository;
 import com.spark.repository.VideoRepository;
 import com.spark.service.MeterialSubService;
+import com.spark.service.NoticeService;
 import com.spark.service.S3Service;
 
 import jakarta.transaction.Transactional;
@@ -63,6 +64,8 @@ public class VideoController {
 	private final MeterialSubRepository materialSubRepository;
 	@Autowired
 	private final MeterialSubService meterialSubService;
+	@Autowired
+	private final NoticeService noticeService;
 	
 	// 강사(2)만 업로드 가능
 	@PostMapping("/upload")
@@ -109,7 +112,7 @@ public class VideoController {
 	                sub.setProgress(0);
 	                progresses.add(sub);
 	            }
-
+	            
 	            materialSubRepository.saveAll(progresses);
 	            return ResponseEntity.ok().body(Map.of(
 	            	    "message", "✅ 영상 및 진도 저장 완료",
