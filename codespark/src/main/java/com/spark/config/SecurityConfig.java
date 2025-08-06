@@ -40,6 +40,7 @@ public class SecurityConfig {
         return source;
     }
     
+    /*
     // Security Filter Chain
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -77,6 +78,28 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             );
 
+        return http.build();
+    }
+    */
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            // ⭐ 모든 요청 허용 (Interceptor에서 처리)
+            .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/", true)
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/")
+                .permitAll()
+            );
         return http.build();
     }
 }

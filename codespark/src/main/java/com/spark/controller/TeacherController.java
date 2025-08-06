@@ -65,6 +65,8 @@ public class TeacherController {
 	public MeterialSubService meterialSubService;
 	@Autowired
 	public MeterialService meterialService;
+	@Autowired
+	private UserService userService;
 	
 	
 	//강사의 강의 목록 조회 (페이지네이션 + 검색)

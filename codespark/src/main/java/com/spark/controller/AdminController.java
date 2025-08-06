@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.S
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -469,8 +470,25 @@ public class AdminController {
 
     // 강의 세부정보 조회
     @GetMapping("/class/Detail/{classId}")
-    public ResponseEntity<?> ClassDetail(@PathVariable(name="classId") String classId) {
+    public ResponseEntity<?> ClassDetail(@PathVariable(name="classId") String classId,HttpSession session) {
     	System.out.println("ClassDetail 컨트롤러 작동");
+        String userId = (String) session.getAttribute("login");
+        String position = (String) session.getAttribute("position");
+        
+        if (userId == null) {
+            System.out.println("로그인 정보 없음 - 401 반환");
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "로그인이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
+        
+        if (!"3".equals(position)) {
+            System.out.println("권한 부족 - 403 반환");
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "관리자 권한이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+        }
+        
     	List<Map<String, Object>>  data = courseservice.findClass(classId);
     	for(Map<String, Object> l :data) System.err.println(l);
         return ResponseEntity.ok().body(data);

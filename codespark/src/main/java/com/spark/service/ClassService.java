@@ -339,9 +339,9 @@ public class ClassService {
 				if(sub.get(0).getProgress()>=80) { //80 이상 들었을때
 					return true;
 				}else return false; //80 이하
-			}else return true; //동영상이 아닌 경우
+			}else return true;//동영상이 아닌 경우
 		}
-		
+	}
 	public void updateClass(String classId, ClassInfoDTO dto) {
 		//1. 해당 강의 엔티티 조회
 		Optional<ClassEntity> optionalEntity = courseRepo.findById(Integer.parseInt(classId));
