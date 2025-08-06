@@ -41,6 +41,7 @@ import com.spark.service.MeterialSubService;
 import com.spark.service.NoticeService;
 import com.spark.service.S3Service;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -102,18 +103,6 @@ public class VideoController {
 	         // 1. 출석(수강신청) 테이블에서 수강 중인 학생 ID 목록 조회
 	            List<String> studentIds = attRepository.findStudentIdsByClassId(video.getClassId());
 	            
-	         // 2. 진도 테이블에 각 학생마다 초기 진도 0으로 등록
-	            List<MeterialSubEntity> progresses = new ArrayList<>();
-	            
-	            for (String stuId : studentIds) {
-	                MeterialSubEntity sub = new MeterialSubEntity();
-	                sub.setMeterialId(video.getMeterId());
-	                sub.setStdId(stuId);
-	                sub.setProgress(0);
-	                progresses.add(sub);
-	            }
-	            
-	            materialSubRepository.saveAll(progresses);
 	            return ResponseEntity.ok().body(Map.of(
 	            	    "message", "✅ 영상 및 진도 저장 완료",
 	            	    "meterialId", video.getMeterId()
@@ -130,11 +119,11 @@ public class VideoController {
 	}
 	
 	@GetMapping("/material/{id}")
-	public ResponseEntity<?> getMaterialById(@PathVariable int id){
+	public ResponseEntity<?> getMaterialById(@PathVariable int id, HttpSession session){
 		System.out.println("🔍 요청 받은 meterId: " + id);
 		MeterialEntity meterial = meterialRepository.findByMeterId(id);
 		System.out.println("🔍 조회 결과 meterial: " + meterial);
-
+		String userId = (String)session.getAttribute("login");
 		 
 		 if (meterial == null) {
 		        return ResponseEntity.status(404).body("해당 자료를 찾을 수 없습니다.");
@@ -144,6 +133,23 @@ public class VideoController {
 		 m.setMeterId(meterial.getMeterId());
 		 m.setContent(meterial.getContent());
 		 m.setDetail(meterial.getDetail());
+		 
+		// 이미 존재하는지 체크
+		 boolean exists = materialSubRepository.existsByMeterialIdAndStdId(id, userId);
+		 
+		 if (!exists) {
+		// 2. 진도 테이블에 각 학생 초기 진도 0으로 등록
+             MeterialSubEntity sub = new MeterialSubEntity();
+             sub.setMeterialId(id);
+             sub.setStdId(userId);
+             sub.setProgress(0);
+         materialSubRepository.save(sub);
+         System.out.println("🟢 새로 등록함");
+		 }else {
+			 System.out.println("중복 insert 방지");
+		 }
+
+		 
 		 return ResponseEntity.ok(m);
 		    
 		}

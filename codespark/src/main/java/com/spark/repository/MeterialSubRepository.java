@@ -35,6 +35,8 @@ public interface MeterialSubRepository  extends JpaRepository<MeterialSubEntity,
 	List<Object[]> findProgressByStudentAndMeterIds(
 			@Param("stdId") String studentId, 
 			@Param("meterId") List<Integer> meterIds);
+
+	boolean existsByMeterialIdAndStdId(int id, String userId);
 					
 					
 }
