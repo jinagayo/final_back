@@ -332,8 +332,7 @@ public class ClassService {
 
 
 	public Object studentDidIt(List<MeterialSubEntity> sub, MeterialEntity m) {
-		System.out.println("왜 있냐고"+sub);
-		if(sub==null||sub.isEmpty()) {
+		if(sub==null) {
 			return false;
 		}else { //sub가 있는 경우
 			if(m.getType().equals("MET001")) {//동영상인 경우
