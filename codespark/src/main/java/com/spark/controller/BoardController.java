@@ -46,49 +46,48 @@ public class BoardController {
     
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> getBoardList(
-            @RequestParam("boardnum") String boardnum,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "search", defaultValue = "") String search,
-            @RequestParam(value = "sortBy", defaultValue = "latest") String sortBy,
-            @RequestParam(value = "filterBy", defaultValue = "all") String filterBy) {
-        
-        try {
-        	
-        	//topbar 검색어
-        	System.out.println("===게시판 검색 요청");
-        	System.out.println("boardnum" + boardnum);
-        	System.out.println("search" + search);
-        	System.out.println("page" + page);
-        	
-        	
-            // 페이지네이션을 위한 Pageable 객체 생성 (0-based indexing)
-            Pageable pageable = PageRequest.of(page - 1, size, getSort(sortBy));
-            
-            // 검색 조건에 따른 게시글 조회
-            Page<BoardDTO> boardPage = boardService.getBoardList(boardnum, search, pageable);
-    
-            // React 컴포넌트에서 기대하는 형식으로 데이터 변환
-            List<Map<String, Object>> notices = boardPage.getContent().stream()
-                .map(this::convertToNoticeFormat)
-                .toList();
-            
-            // 응답 데이터 구성
-            Map<String, Object> responseData = new HashMap<>();
-            responseData.put("notices", notices);
-            responseData.put("currentPage", page);
-            responseData.put("totalPages", boardPage.getTotalPages());
-            responseData.put("totalElements", boardPage.getTotalElements());
-            responseData.put("hasNext", boardPage.hasNext());
-            responseData.put("hasPrevious", boardPage.hasPrevious());
-            
-            return ResponseEntity.ok(new ApiResponse(true, "게시글 조회 성공", notices, boardPage.getTotalPages()));
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ApiResponse(false, "게시글 조회 실패: " + e.getMessage(), null, 0));
-        }
+		    @RequestParam("boardnum") String boardnum,
+		    @RequestParam(value = "classId", required = false) String classId,
+		    @RequestParam(value = "page", defaultValue = "1") int page,
+		    @RequestParam(value = "size", defaultValue = "10") int size,
+		    @RequestParam(value = "search", defaultValue = "") String search,
+		    @RequestParam(value = "sortBy", defaultValue = "latest") String sortBy,
+		    @RequestParam(value = "filterBy", defaultValue = "all") String filterBy) {
+
+		    try {
+		
+			    // 페이지네이션을 위한 Pageable 객체 생성 (0-based indexing)
+			    Pageable pageable = PageRequest.of(page - 1, size, getSort(sortBy));
+			    Page<BoardDTO> boardPage;
+			    if(classId != null && !classId.isEmpty()) {
+			    	boardPage = boardService.getBoardList(classId,boardnum, search, pageable);
+			    }else {
+			    	boardPage = boardService.getBoardList("",boardnum, search, pageable);
+			    }
+
+	    // 검색 조건에 따른 게시글 조회
+	
+	    // React 컴포넌트에서 기대하는 형식으로 데이터 변환
+	    List<Map<String, Object>> notices = boardPage.getContent().stream()
+	    .map(this::convertToNoticeFormat)
+	    .toList();
+	
+	    // 응답 데이터 구성
+	    Map<String, Object> responseData = new HashMap<>();
+	    responseData.put("notices", notices);
+	    responseData.put("currentPage", page);
+	    responseData.put("totalPages", boardPage.getTotalPages());
+	    responseData.put("totalElements", boardPage.getTotalElements());
+	    responseData.put("hasNext", boardPage.hasNext());
+	    responseData.put("hasPrevious", boardPage.hasPrevious());
+	
+	    return ResponseEntity.ok(new ApiResponse(true, "게시글 조회 성공", notices, boardPage.getTotalPages()));
+
+	    } catch (Exception e) {
+		    e.printStackTrace();
+		    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+		    .body(new ApiResponse(false, "게시글 조회 실패: " + e.getMessage(), null, 0));
+    	}
     }
     
     //조회수
@@ -134,7 +133,7 @@ public class BoardController {
             boardDTO.setUser_id(userId);
             boardDTO.setBoardnum(boardnum);
             
-            BoardDTO createdBoard = boardService.createBoard(boardDTO);
+            BoardDTO createdBoard = boardService.createBoard(boardnum,boardDTO);
             
             return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
         } catch (Exception e) {
@@ -220,7 +219,7 @@ public class BoardController {
             this.totalPage = totalPage;
         }
         
-        // getters and setters
+		// getters and setters
         public boolean isSuccess() { return success; }
         public void setSuccess(boolean success) { this.success = success; }
         

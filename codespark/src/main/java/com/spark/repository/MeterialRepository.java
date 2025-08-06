@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 import com.spark.Entity.MeterialEntity;
 import com.spark.dto.MeterialDTO;
 
+import jakarta.transaction.Transactional;
+
 
 public interface MeterialRepository extends JpaRepository<MeterialEntity, Integer>{
 
@@ -31,6 +33,13 @@ public interface MeterialRepository extends JpaRepository<MeterialEntity, Intege
 	@Query(value="UPDATE `meterial` SET seq=:seq  where meter_id=:meterId",
 		    nativeQuery = true)
 	void changeSeq(@Param("meterId")int meterId, @Param("seq")int seq);
+
+	MeterialEntity findByMeterIdAndClassId(Integer meterId, Integer classId);
+
+	@Transactional
+	@Modifying
+	@Query("DELETE FROM MeterialEntity m WHERE m.classId =:classId AND m.meterId =:meterId")
+	int deleteByClassIdAndMeterId(Integer classId, Integer meterId);
 
 
 	

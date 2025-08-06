@@ -1,5 +1,6 @@
 package com.spark.service;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +75,6 @@ public class ClassService {
     private TestRepository testRepo;
     @Autowired
     private TestSubRepository testSubRepo;
-    
 
     ClassService(CourseRepository courseRepo) {
         this.courseRepo = courseRepo;
@@ -342,6 +342,23 @@ public class ClassService {
 			}else return true; //동영상이 아닌 경우
 		}
 		
+	public void updateClass(String classId, ClassInfoDTO dto) {
+		//1. 해당 강의 엔티티 조회
+		Optional<ClassEntity> optionalEntity = courseRepo.findById(Integer.parseInt(classId));
+		if(optionalEntity.isEmpty()) {
+			throw new RuntimeException("해당 강의를 찾을 수 없습니다: " + classId);
+		}
+		ClassEntity entity = optionalEntity.get();
+		
+		//2. DTO에서 값 복사
+		entity.setName(dto.getName());
+		entity.setDetail(dto.getDetail());
+		entity.setIntro(dto.getIntro());
+		entity.setPrice(dto.getPrice());
+		entity.setImg(dto.getImg());
+		entity.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+		
+		courseRepo.save(entity);
 	}
 
 }

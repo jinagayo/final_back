@@ -109,4 +109,10 @@ public interface CourseRepository extends JpaRepository<ClassEntity, Integer> {
         """, nativeQuery = true)
 	List<Map<String, Object>> searchClasses(@Param("keyword") String keyword);
 
+    @Query("SELECT c FROM ClassEntity c WHERE c.classId = :classId")
+    Optional<ClassEntity> findByCodeId(@Param("classId") String classId);
+
+    @Query("SELECT c FROM ClassEntity c WHERE c.subId = :subId AND c.isActive = true ORDER BY c.createdAt DESC")
+    List<ClassEntity> findBySubIdAndIsActiveTrue(@Param("subId") String subId);
+
 }
