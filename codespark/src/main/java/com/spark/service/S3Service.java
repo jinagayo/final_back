@@ -50,23 +50,28 @@ public class S3Service {
 	
 	
 	public String upload(MultipartFile file, String folderName) throws IOException{
-		
-		String originalFilename = file.getOriginalFilename();
-		String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-	    // 랜덤 파일명(중복 방지)
-	    String uuid = UUID.randomUUID().toString();
-	    String key = folderName + "/" + uuid + extension;
+		 try {
+		        String originalFilename = file.getOriginalFilename();
+		        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+		        String uuid = UUID.randomUUID().toString();
+		        String key = folderName + "/" + uuid + extension;
 
-		
-		PutObjectRequest putRequest = PutObjectRequest.builder()
-				.bucket(bucketName)
-				.key(key)
-				.contentType(file.getContentType())
-				.build();
-		
-		s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-	
-			return key;
+		        PutObjectRequest putRequest = PutObjectRequest.builder()
+		            .bucket(bucketName)
+		            .key(key)
+		            .contentType(file.getContentType())
+		            .build();
+
+		        s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+
+		        System.out.println("S3 업로드 성공: " + key); // 업로드 성공 로그
+
+		        return key;
+		    } catch(Exception e) {
+		        System.out.println("S3 업로드 실패: " + e.getMessage());
+		        e.printStackTrace();
+		        throw e;
+		    }
 	}
 	//이미지/영상 업로드 용도
 	public String generatePresignedUploadUrl(String fileName) {

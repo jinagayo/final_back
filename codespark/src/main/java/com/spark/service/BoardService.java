@@ -80,7 +80,7 @@ public class BoardService {
     /**
      * 게시글 생성
      */
-    public BoardDTO createBoard(String classId,BoardDTO boardDTO) {
+    public BoardDTO createBoard(BoardDTO boardDTO) {
         // 새 게시글의 ID 생성 (자동 증가)
         boardDTO.setBoard_id(getNextBoardId());
         boardDTO.setHits(0);
@@ -105,7 +105,8 @@ public class BoardService {
             boardDTO.getBoardnum(),  // "BOD001" 그대로 저장됨
             boardDTO.getUser_id(),
             boardDTO.getContent(),
-            classId
+            classId,
+            boardDTO.getFile()
         );
         
         // 저장된 데이터 조회해서 반환

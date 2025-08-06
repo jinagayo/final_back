@@ -17,7 +17,7 @@ public class BoardDTO {
 	private String user_id;//작성자 아이디
 	private String content;//내용
 	private String file;//파일
-	private String class_id;//강의코드
+	private String class_id;//강의코드ㅁ
 	private int hits;//조회수
 	private Date created_at;//등록날짜
 	private String created_by;//등록인
