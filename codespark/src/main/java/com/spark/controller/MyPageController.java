@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,8 +51,6 @@ import jakarta.validation.Valid;
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true") // CORS 설정 추가
 public class MyPageController {
 
-	@Autowired
-	private PasswordEncoder pwEncoder;
 	
 	@Autowired
 	private UserService userService;
@@ -125,11 +124,11 @@ public class MyPageController {
     public ResponseEntity<?> passwordCheck(HttpSession session,@RequestBody String pw) {
     	System.out.println("passwordCheck 컨트롤러 작동중");
     	String id = (String)session.getAttribute("login");
-    	UserEntity user = userService.UserProfile(id);
     	System.out.println(pw);
 
 		//비밀번호 확인
-		if(!pwEncoder.matches(pw, user.getPw())) {
+		if(!userService.passWordCheck(id,pw)) {
+			System.out.println("비번 틀림");
             Map<String, Object> response = new HashMap<>();
             return ResponseEntity.badRequest().body(response);
 		}
@@ -184,6 +183,20 @@ public class MyPageController {
     		error.put("message", "이미지 업로드 실패: " + e.getMessage());
     		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     	}
+    }
+    @DeleteMapping("userDelete")
+    public ResponseEntity<?> userDelete(HttpSession session) {
+        System.out.println("userDelete 동작");
+        String id = (String) session.getAttribute("login");
+        userService.deleteUser(id);
+        return ResponseEntity.ok("회원 삭제 완료");
+    }
+    @PostMapping("passwordChange")
+    public ResponseEntity<?> passwordChange(HttpSession session, @RequestBody String pw) {
+        System.out.println("passwordChange 동작"+pw);
+        String id = (String) session.getAttribute("login");
+        userService.pwChange(id,pw);
+        return ResponseEntity.ok("비밀번호 벼녁ㅇ 완료");
     }
 
     /*

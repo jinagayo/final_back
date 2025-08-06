@@ -38,6 +38,7 @@ import com.spark.repository.MeterialSubRepository;
 import com.spark.repository.UserRepository;
 import com.spark.repository.VideoRepository;
 import com.spark.service.MeterialSubService;
+import com.spark.service.NoticeService;
 import com.spark.service.S3Service;
 
 import jakarta.servlet.http.HttpSession;
@@ -64,6 +65,8 @@ public class VideoController {
 	private final MeterialSubRepository materialSubRepository;
 	@Autowired
 	private final MeterialSubService meterialSubService;
+	@Autowired
+	private final NoticeService noticeService;
 	
 	// 강사(2)만 업로드 가능
 	@PostMapping("/upload")
@@ -100,7 +103,6 @@ public class VideoController {
 	         // 1. 출석(수강신청) 테이블에서 수강 중인 학생 ID 목록 조회
 	            List<String> studentIds = attRepository.findStudentIdsByClassId(video.getClassId());
 	            
-	      
 	            return ResponseEntity.ok().body(Map.of(
 	            	    "message", "✅ 영상 및 진도 저장 완료",
 	            	    "meterialId", video.getMeterId()

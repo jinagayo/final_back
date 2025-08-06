@@ -1,5 +1,8 @@
 package com.spark.Entity;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.spark.dto.SocialPaymentDTO;
 import com.spark.dto.StudentDTO;
 
@@ -13,6 +16,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @Table(name = "student")
+@SQLDelete(sql = "UPDATE student SET is_active = false WHERE stud_id = ?")
+@Where(clause = "is_active = true")
 @NoArgsConstructor
 public class StudentEntity {
 	@Id

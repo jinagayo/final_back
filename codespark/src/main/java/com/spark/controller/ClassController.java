@@ -91,16 +91,29 @@ public class ClassController {
         }
         //수업자료
         List<MeterialEntity> meterial = classService.getMeterials(Integer.parseInt(classId));
-        for(MeterialEntity m : meterial)System.out.println(m);
+        
 
+        //수업자료에 따른 수행 여부
+        List<Map<String,Object>> meterials= new ArrayList<>();
+        for(MeterialEntity m : meterial) {
+        	Map<String,Object> map = new HashMap<>();
+        	map.put("meterial", m);
+        	List<MeterialSubEntity> sub = classService.getMeterialSubOne(String.format("%d", m.getMeterId()), id);
+            System.out.println("subsubsubsubsub"+sub);
+        	
+        	map.put("sub",classService.studentDidIt(sub,m));
+        	meterials.add(map);
+        }
+        
         //리뷰
         Integer attId = classService.getAttId(id,classId);
         Boolean review = classService.reviewYN(attId);
         System.out.println(review);
         
+        
         Map<String, Object> map = new HashMap<>();
         map.put("class", classDto);
-        map.put("material", meterial);
+        map.put("meterials", meterials);
         map.put("review", review);
         
         
@@ -217,7 +230,7 @@ public class ClassController {
     	data.put("title", metEntity.getTitle());
     	data.put("content", metEntity.getContent());
     	//시험점수
-    	MeterialSubEntity subEntity = classService.getMeterialSubOne(meterialId,id);
+    	MeterialSubEntity subEntity = classService.getMeterialSubOne(meterialId,id).get(0);
     	data.put("score", subEntity.getContent());
     	//문제정보
     	List<Map<String,Object>> questions = new ArrayList<>();
