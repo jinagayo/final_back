@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.spark.Entity.SubjectReviewEntity;
 import com.spark.dto.AttendanceDTO;
 import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
 import com.spark.dto.SocialPaymentDTO;
+import com.spark.repository.CourseRepository;
 import com.spark.service.CourseService;
 import com.spark.service.S3Service;
 
@@ -39,6 +41,8 @@ public class CourseController {
     private CourseService courseService;
     @Autowired
     private S3Service s3Service;
+    @Autowired
+    private CourseRepository courseRepo;
     
     
     @GetMapping("List")
@@ -48,21 +52,56 @@ public class CourseController {
     }
     @GetMapping("Detail")
     public ResponseEntity<?> CoursesDetail(@RequestParam("class_id") String classId) {
-    	System.out.println("디테일 컨트롤러 작동중");
-    	
-        return courseService.getCourses(classId);
+    	List<Map<String, Object>> courseRawData = courseRepo.ClassDetail(classId);
+        if (courseRawData.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Map<String, Object> courseDetailOrigin = courseRawData.get(0);
+        Map<String, Object> courseDetail = new HashMap<>(courseDetailOrigin);
+
+        // 🔥 img가 있으면 presigned URL로 변환!
+        Object imgObj = courseDetail.get("img");
+        if (imgObj != null && imgObj instanceof String) {
+            String imgKey = (String) imgObj;
+            // 이미 URL이 아니라면 presigned로 변환
+            if (!imgKey.startsWith("http")) {
+                String presignedUrl = s3Service.generatePresignedReadUrl(imgKey);
+                courseDetail.put("img", presignedUrl);
+            }
+        }
+
+        List<SubjectReviewEntity> reviews = courseRepo.findReview(classId);
+        courseDetail.put("reviews", reviews);
+
+        return ResponseEntity.ok(courseDetail);
     }
+    
     @GetMapping("Payment")
-    public ResponseEntity<?> CoursesPay(@RequestParam("class_id") String classId,HttpSession session) {
-        String id = (String)session.getAttribute("login");
-    	System.out.println("페이 컨트롤러 작동중");
-    	if(courseService.isTaking(id,classId)) {
-    		return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("이미 수강중인 강의입니다.");
-    	}
-    	
-    	return courseService.getCourses(classId);
+    public ResponseEntity<?> CoursesPay(@RequestParam("class_id") String classId) {
+    	List<Map<String, Object>> courseRawData = courseRepo.ClassDetail(classId);
+        if (courseRawData.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Map<String, Object> courseDetailOrigin = courseRawData.get(0);
+        Map<String, Object> courseDetail = new HashMap<>(courseDetailOrigin);
+
+        // 🔥 img가 있으면 presigned URL로 변환!
+        Object imgObj = courseDetail.get("img");
+        if (imgObj != null && imgObj instanceof String) {
+            String imgKey = (String) imgObj;
+            // 이미 URL이 아니라면 presigned로 변환
+            if (!imgKey.startsWith("http")) {
+                String presignedUrl = s3Service.generatePresignedReadUrl(imgKey);
+                courseDetail.put("img", presignedUrl);
+            }
+        }
+
+        List<SubjectReviewEntity> reviews = courseRepo.findReview(classId);
+        courseDetail.put("reviews", reviews);
+
+        return ResponseEntity.ok(courseDetail);
 
     }
     
@@ -144,5 +183,4 @@ public class CourseController {
     	
         return ResponseEntity.ok().body(data);
     }
-    
 }

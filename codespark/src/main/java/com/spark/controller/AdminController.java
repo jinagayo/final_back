@@ -262,7 +262,6 @@ public class AdminController {
     public ResponseEntity<?> getLatestBannerImage(){
          Optional<CommonEntity> banner = commonRepository.findById("BANNER_MAIN");
        
-
            String url = banner.map(CommonEntity::getName)
                               .orElse("/img/main.png");
            
@@ -509,4 +508,6 @@ public class AdminController {
                 .body(Map.of("success", false, "message", "검색 중 오류가 발생했습니다."));
         }
     }
+    
+  
 }

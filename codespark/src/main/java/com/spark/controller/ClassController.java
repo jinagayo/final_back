@@ -295,24 +295,39 @@ public class ClassController {
     }
     
     //강의별 게시판 글쓰기
+    
     @PostMapping("board/write/{classId}")
     public ResponseEntity<ApiResponse> createBoard(
-        @PathVariable String classId,
-        @RequestBody BoardDTO boardDTO,
-        HttpServletRequest request
-    ) {
-        String userId = (String) request.getSession().getAttribute("login");
+        @RequestParam("title") String title,
+        @RequestParam("content") String content,
+        @RequestParam("boardnum") String boardnum,
+        @RequestParam("class_id") String class_id,
+        @RequestParam(value = "file", required = false) MultipartFile file,
+        HttpSession session
+    ) throws IOException {
+        String userId = (String)session.getAttribute("login");
+        
+
         if (userId == null) {
             System.out.println("로그인되지 않음 - 401 반환");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
         }
 
-        boardDTO.setUser_id(userId); // 작성자 ID 설정
-        boardDTO.setClass_id(classId);
-
+        //S3업로드
+        String s3Key = s3Service.upload(file, "board");
+        String assignmentUrl = "https://my-lecture-video.s3.ap-northeast-2.amazonaws.com/" + s3Key;
+        
+        BoardDTO board = new BoardDTO();
+        board.setTitle(title);
+        board.setContent(content);
+        board.setBoardnum(boardnum);
+        board.setClass_id(class_id);
+        board.setFile(assignmentUrl);
+        board.setUser_id(userId);
+        
         try {
-            BoardDTO createdBoard = boardService.createBoardClassId(classId, boardDTO);
+            BoardDTO createdBoard = boardService.createBoardClassId(class_id, board);
             System.out.println("서비스 호출 완료 - 성공");
             return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
         } catch (Exception e) {

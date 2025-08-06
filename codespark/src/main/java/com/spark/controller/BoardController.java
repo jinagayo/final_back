@@ -1,5 +1,6 @@
 package com.spark.controller;
 
+import com.spark.controller.ClassController.ApiResponse;
 import com.spark.dto.ApiResponseComment;
 import com.spark.dto.BoardDTO;
 import com.spark.dto.CommentDTO;
@@ -7,6 +8,7 @@ import com.spark.dto.CommentRequestDTO;
 import com.spark.service.BoardService;
 import com.spark.service.CodingService;
 import com.spark.service.CommentService;
+import com.spark.service.S3Service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -20,7 +22,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +41,9 @@ public class BoardController {
     
     @Autowired
     private CommentService commService;
+    
+    @Autowired
+    private S3Service s3Service;
 
 
     BoardController(CodingService codingService) {
@@ -122,20 +129,32 @@ public class BoardController {
     
   //게시글 작성
     @PostMapping("/write/{boardnum}")
-    public ResponseEntity<ApiResponse> createBoard(@RequestBody BoardDTO boardDTO, @PathVariable String boardnum,HttpServletRequest request) {
+    public ResponseEntity<ApiResponse> createBoard(
+    		  @RequestParam("title") String title,
+    	      @RequestParam("content") String content,
+    	      @RequestParam("boardnum") String boardnum,
+    	      @RequestParam(value = "file", required = false) MultipartFile file,
+    	      HttpSession session
+    	      )throws IOException {
         try {            
-            HttpSession session = request.getSession();
             String userId = (String)session.getAttribute("login");
             
             if(userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
             }
-            boardDTO.setUser_id(userId);
-            boardDTO.setBoardnum(boardnum);
+            //S3업로드
+            String s3Key = s3Service.upload(file, "board");
+            String assignmentUrl = "https://my-lecture-video.s3.ap-northeast-2.amazonaws.com/" + s3Key;
             
-            BoardDTO createdBoard = boardService.createBoard(boardnum,boardDTO);
+            BoardDTO board = new BoardDTO();
+            board.setTitle(title);
+            board.setContent(content);
+            board.setBoardnum(boardnum);
+            board.setFile(assignmentUrl);
+            board.setUser_id(userId);
             
-            return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
+            BoardDTO createdBoard = boardService.createBoard(board);
+            return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", board, 0));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse(false, "게시글 작성 실패: " + e.getMessage(), null, 0));
