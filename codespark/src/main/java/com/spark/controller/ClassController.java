@@ -7,18 +7,26 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
+import com.spark.service.BoardService;
 import com.spark.service.ClassService;
+import com.spark.service.CommentService;
 import com.spark.service.CourseService;
 import com.spark.service.MeterialSubService;
 import com.spark.service.S3Service;
@@ -26,18 +34,26 @@ import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.TestEntity;
 import com.spark.Entity.TestSubEntity;
+import com.spark.dto.ApiResponseComment;
+import com.spark.dto.BoardDTO;
+import com.spark.dto.ClassDTO;
 import com.spark.dto.ClassInfoDTO;
+import com.spark.dto.CommentDTO;
+import com.spark.dto.CommentRequestDTO;
 import com.spark.dto.MeterialDTO;
 import com.spark.dto.SubjectReviewDTO;
 import com.spark.dto.TestDTO;
 import com.spark.dto.TestSubDTO;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/myclass/")
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
 public class ClassController {
+
     @Autowired
     private ClassService classService;
     @Autowired
@@ -45,6 +61,15 @@ public class ClassController {
     @Autowired
     private MeterialSubService meterialSubService;
     
+	@Autowired
+	private BoardService boardService;
+	
+	@Autowired
+	private CourseService courseService;
+	
+	@Autowired
+	private CommentService commService;
+
     @GetMapping("List")
     public ResponseEntity<?> getAllClass(HttpSession session) {
     	System.out.println("getAllClass 작동중");
@@ -60,6 +85,7 @@ public class ClassController {
         String id = (String)session.getAttribute("login");
         //수업 정보
         ClassInfoDTO classDto = classService.getClass(classId);
+       
         if (classDto == null) {
             return ResponseEntity.status(404).body("강의 정보를 찾을 수 없습니다.");
         }
@@ -227,5 +253,330 @@ public class ClassController {
         return ResponseEntity.ok().body(data);
     }
     
-   
+    //강의별 게시판
+    @GetMapping("board/list/{classId}")
+    public ResponseEntity<ApiResponse> getClassBoardList(
+        @PathVariable("classId") String classId,
+        @RequestParam("boardNum") String boardNum,
+        @RequestParam(value = "page", defaultValue = "1") int page,
+        @RequestParam(value = "size", defaultValue = "10") int size,
+        @RequestParam(value = "search", defaultValue = "") String search,
+        @RequestParam(value = "sortBy", defaultValue = "latest") String sortBy,
+        @RequestParam(value = "filterBy", defaultValue = "all") String filterBy) {
+        
+        try {
+            Pageable pageable = PageRequest.of(page - 1, size);
+            
+            Page<Map<String, Object>> boardPage = boardService.getBoardsByClassId(
+                classId, boardNum, search,filterBy, pageable
+            );
+            // 과목 정보도 함께 조회
+            Map<String, Object> classInfo = courseService.getSubjectInfo(classId);
+            
+            // 응답 데이터 구성
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("boards", boardPage.getContent());
+            responseData.put("currentPage", page);
+            responseData.put("totalPage", boardPage.getTotalPages());
+            responseData.put("totalElements", boardPage.getTotalElements());
+            responseData.put("size", size);
+            responseData.put("subId", classId);
+            responseData.put("classtName", classInfo.get("name"));
+            responseData.put("boardnum", boardNum);
+            
+            return ResponseEntity.ok(new ApiResponse(true, "과목별 게시글 조회 성공", responseData, boardPage.getTotalPages()));
+            
+        } catch (Exception e) {
+            System.err.println("과목별 게시글 조회 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            	    .body(new ApiResponse(false, "조회 실패: " + e.getMessage(), null, 0));
+        }
+    }
+    
+    //강의별 게시판 글쓰기
+    @PostMapping("board/write/{classId}")
+    public ResponseEntity<ApiResponse> createBoard(
+        @PathVariable String classId,
+        @RequestBody BoardDTO boardDTO,
+        HttpServletRequest request
+    ) {
+        String userId = (String) request.getSession().getAttribute("login");
+        if (userId == null) {
+            System.out.println("로그인되지 않음 - 401 반환");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+        }
+
+        boardDTO.setUser_id(userId); // 작성자 ID 설정
+        boardDTO.setClass_id(classId);
+
+        try {
+            BoardDTO createdBoard = boardService.createBoardClassId(classId, boardDTO);
+            System.out.println("서비스 호출 완료 - 성공");
+            return ResponseEntity.ok(new ApiResponse(true, "게시글 작성 성공", createdBoard, 0));
+        } catch (Exception e) {
+            System.out.println("서비스 호출 중 예외 발생: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "게시글 작성 실패", null, 0));
+        }
+    }
+    
+    //강의별 게시판 상세보기
+    @GetMapping("board/detail/{classId}/{boardId}")
+    public ResponseEntity<ApiResponse> getBoardDetail(
+        @PathVariable String classId,
+        @PathVariable int boardId) {
+        
+        try {
+            BoardDTO board = boardService.getBoardById(boardId); // 메서드명 변경!
+            
+            if (board == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(false, "게시글을 찾을 수 없습니다.", null, 0));
+            }
+            
+            if (!classId.equals(board.getClass_id())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse(false, "해당 강의의 게시글이 아닙니다.", null, 0));
+            }
+            
+            Map<String, Object> notice = convertToNoticeFormat(board);
+            return ResponseEntity.ok(new ApiResponse(true, "게시글 조회 성공", notice, 0));
+            
+        } catch (Exception e) {
+            System.out.println("상세보기 오류: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "게시글 조회 실패: " + e.getMessage(), null, 0));
+        }
+    }
+    
+    //강의별 게시판 수정
+    @GetMapping("board/edit/{classId}/{boardId}")
+    public ResponseEntity<ApiResponse> getBoardForEdit(
+        @PathVariable String classId,
+        @PathVariable int boardId) {
+        
+        try {
+            System.out.println("=== 게시글 조회 (수정용) ===");
+            System.out.println("classId: " + classId);
+            System.out.println("boardId: " + boardId);
+            
+            // 게시글 조회
+            BoardDTO board = boardService.getBoardByclassId(boardId);
+            
+            if (board == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(false, "게시글을 찾을 수 없습니다.", null, 0));
+            }
+            
+            // 게시글의 class_id가 요청한 classId와 일치하는지 확인
+            if (!classId.equals(board.getClass_id())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse(false, "해당 강의의 게시글이 아닙니다.", null, 0));
+            }
+            
+            return ResponseEntity.ok(new ApiResponse(true, "게시글 조회 성공", board, 0));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "게시글 조회 실패: " + e.getMessage(), null, 0));
+        }
+    }
+    
+    @PutMapping("board/edit/{classId}/{boardId}")
+    public ResponseEntity<ApiResponse> updateBoard(
+        @PathVariable String classId, 
+        @PathVariable int boardId, 
+        @RequestBody BoardDTO boardDTO) {
+        
+        try {
+            System.out.println("=== 수정 컨트롤러 호출됨 ===");
+            System.out.println("받은 classId: " + classId);
+            System.out.println("받은 boardId: " + boardId);
+            System.out.println("받은 DTO: " + boardDTO.toString());
+            
+            boardDTO.setBoard_id(boardId);
+            boardDTO.setClass_id(classId); // classId도 설정
+            System.out.println("컨트롤러 class_id = " + boardDTO.getClass_id());
+            
+            
+            BoardDTO updatedBoard = boardService.updateBoardByClassId(boardDTO);
+            return ResponseEntity.ok(new ApiResponse(true, "게시글 수정 성공", updatedBoard, 0));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "게시글 수정 실패: " + e.getMessage(), null, 0));
+        }
+    }
+
+    //강의별 게시판 삭제
+    @DeleteMapping("board/delete/{classId}/{boardId}")
+    public ResponseEntity<ApiResponse> deleteBoard(
+        @PathVariable String classId,
+        @PathVariable int boardId,
+        HttpServletRequest request) {
+        
+        String userId = (String) request.getSession().getAttribute("login");
+        if (userId == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+        }
+        
+        try {
+            boardService.deleteBoardByClassId(classId, boardId, userId);
+            return ResponseEntity.ok(new ApiResponse(true, "게시글 삭제 성공", null, 0));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "게시글 삭제 실패: " + e.getMessage(), null, 0));
+        }
+    }
+    
+    //강의별 게시판 댓글 조회
+    @GetMapping("board/{boardno}/comments")
+    public ResponseEntity<ApiResponseComment<List<CommentDTO>>> getComments(
+            @PathVariable("boardno") int boardno) {
+        
+        try {
+            List<CommentDTO> comments = commService.getCommentsByBoardno(boardno);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 목록 조회 성공", comments));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 목록 조회 중 오류가 발생했습니다."));
+        }
+    }
+    
+    //댓글작성
+    @PostMapping("board/{boardno}/comments")
+    public ResponseEntity<ApiResponseComment<CommentDTO>> createComment(
+            @PathVariable("boardno") int boardno,
+            @Valid @RequestBody CommentRequestDTO request,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            // 세션에서 사용자 정보 추출 (실제 구현에 맞게 수정);
+            String userId = getCurrentUserId(httpRequest);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+            }
+            
+            CommentDTO comment = commService.createComment(boardno, request, userId);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 작성 성공", comment));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponseComment.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 작성 중 오류가 발생했습니다."));
+        }
+    }
+    
+    
+    //댓글 수정
+    @PutMapping("board/comments/{commentId}")
+    public ResponseEntity<ApiResponseComment<CommentDTO>> updateComment(
+            @PathVariable("commentId") int commentId,
+            @Valid @RequestBody CommentRequestDTO request,
+            HttpServletRequest httpRequest) {
+
+        try {
+            String userId = getCurrentUserId(httpRequest);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+            }
+            CommentDTO comment = commService.updateComment(commentId, request, userId);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 수정 성공", comment));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponseComment.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 수정 중 오류가 발생했습니다."));
+        }
+    }
+    
+    private String getCurrentUserId(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        Object loginId = session.getAttribute("login");
+        if (loginId != null) {
+            return loginId.toString();
+        }
+        return null;
+    }
+    
+    //댓글 삭제
+    @DeleteMapping("board/comments/{commentId}")
+    public ResponseEntity<ApiResponseComment<Void>> deleteComment(
+            @PathVariable("commentId") int commentId,
+            HttpServletRequest httpRequest) {
+        
+        try {
+            String userId = getCurrentUserId(httpRequest);
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+            }
+            
+            commService.deleteComment(commentId, userId);
+            return ResponseEntity.ok(ApiResponseComment.success("댓글 삭제 성공", null));
+            
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponseComment.error(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(ApiResponseComment.error("댓글 삭제 중 오류가 발생했습니다."));
+        }
+    }
+
+    //Api
+    class ApiResponse {
+        private boolean success;
+        private String message;
+        private Object data;
+        private int totalPage;
+        
+        public ApiResponse(boolean success, String message, Object data, int totalPage) {
+            this.success = success;
+            this.message = message;
+            this.data = data;
+            this.totalPage = totalPage;
+        }
+        
+		// getters and setters
+        public boolean isSuccess() { return success; }
+        public void setSuccess(boolean success) { this.success = success; }
+        
+        public String getMessage() { return message; }
+        public void setMessage(String message) { this.message = message; }
+        
+        public Object getData() { return data; }
+        public void setData(Object data) { this.data = data; }
+        
+        public int getTotalPage() { return totalPage; }
+        public void setTotalPage(int totalPage) { this.totalPage = totalPage; }
+    }
+    
+    private Map<String, Object> convertToNoticeFormat(BoardDTO board) {
+        Map<String, Object> notice = new HashMap<>();
+        notice.put("id", board.getBoard_id());
+        notice.put("title", board.getTitle());
+        notice.put("content", board.getContent());
+        notice.put("author", board.getUser_id());
+        notice.put("createdBy", board.getUser_id());
+        notice.put("views", board.getHits());
+        notice.put("viewCount", board.getHits());
+        notice.put("isPinned", false); // 기본값, 필요시 로직 추가
+        notice.put("pinned", false);   // 기본값, 필요시 로직 추가
+        notice.put("createdAt", java.time.LocalDateTime.now().toString()); // 실제로는 DB에서 가져와야 함
+        notice.put("boardnum", board.getBoardnum());
+        notice.put("classId", board.getClass_id());
+        notice.put("file", board.getFile());
+        return notice;
+    }
 }

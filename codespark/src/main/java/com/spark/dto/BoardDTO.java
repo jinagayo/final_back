@@ -1,5 +1,7 @@
 package com.spark.dto;
 
+import java.util.Date;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -17,4 +19,9 @@ public class BoardDTO {
 	private String file;//파일
 	private String class_id;//강의코드
 	private int hits;//조회수
+	private Date created_at;//등록날짜
+	private String created_by;//등록인
+	private Date updated_at;//수정날짜
+	private String updated_by;//수정인
+	private int is_active;//활성
 }
