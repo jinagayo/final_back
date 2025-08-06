@@ -69,8 +69,6 @@ public class TeacherController {
 		this.classService = classService;
 	}
 	@Autowired
-	public UserService userService;
-	@Autowired
 	public MeterialSubService meterialSubService;
 	@Autowired
 	public MeterialService meterialService;

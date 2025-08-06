@@ -331,16 +331,19 @@ public class ClassService {
 
 
 
-	public Object studentDidIt(List<MeterialSubEntity> sub, MeterialEntity m) {
-		if(sub==null) {
-			return false;
-		}else { //sub가 있는 경우
-			if(m.getType().equals("MET001")) {//동영상인 경우
-				if(sub.get(0).getProgress()>=80) { //80 이상 들었을때
-					return true;
-				}else return false; //80 이하
-			}else return true; //동영상이 아닌 경우
-		}
+	   public Object studentDidIt(List<MeterialSubEntity> sub, MeterialEntity m) {
+		      System.out.println("왜 있냐고"+sub);
+		      if(sub==null||sub.isEmpty()) {
+		         return false;
+		      }else { //sub가 있는 경우
+		         if(m.getType().equals("MET001")) {//동영상인 경우
+		            if(sub.get(0).getProgress()>=80) { //80 이상 들었을때
+		               return true;
+		            }else return false; //80 이하
+		         }else return true; //동영상이 아닌 경우
+		      }
+		      
+		   }
 		
 	public void updateClass(String classId, ClassInfoDTO dto) {
 		//1. 해당 강의 엔티티 조회
