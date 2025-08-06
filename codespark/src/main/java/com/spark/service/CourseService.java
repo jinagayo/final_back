@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -116,7 +118,6 @@ public class CourseService {
 		courseRepo.deleteById(id);
 		
 	}
-
 	   public List<ClassInfoDTO> getMain() {
 		      List<ClassInfoDTO> allClass=courseRepo.findAllClass();
 		      List<ClassInfoDTO> list = new ArrayList<>();
@@ -125,6 +126,31 @@ public class CourseService {
 		      }
 		      return list;
 		   }
+	   public Map<String, Object> getSubjectInfo(String subId) {
+		    try {
+		        // CodeEntity에서 과목 정보 조회
+		        Optional<ClassEntity> subject = courseRepo.findByCodeId(subId);
+		        
+		        Map<String, Object> info = new HashMap<>();
+		        if (subject.isPresent()) {
+		            info.put("id", subject.get().getSubId());
+		            info.put("name", subject.get().getName());
+		            info.put("description", subject.get().getIntro());
+		        } else {
+		            info.put("id", subId);
+		            info.put("name", "알 수 없는 과목");
+		            info.put("description", "");
+		        }
+		        
+		        return info;
+		    } catch (Exception e) {
+		        System.err.println("과목 정보 조회 오류: " + e.getMessage());
+		        Map<String, Object> info = new HashMap<>();
+		        info.put("id", subId);
+		        info.put("name", "과목 정보 없음");
+		        return info;
+		    }
+		}
 
 	   public boolean isTaking(String id, String classId) {
 		Integer attendance = attendRepo.findAttId(id,classId);
@@ -134,8 +160,26 @@ public class CourseService {
 		}
 		return true;
 	   }
-
-
-
-
+	   public List<Map<String, Object>> getClassesBySubjectId(String subId) {
+		    try {
+		        List<ClassEntity> classes = courseRepo.findBySubIdAndIsActiveTrue(subId);
+		        
+		        return classes.stream().map(cls -> {
+		            Map<String, Object> map = new HashMap<>();
+		            map.put("classId", cls.getClassId());
+		            map.put("name", cls.getName());
+		            map.put("intro", cls.getIntro());
+		            map.put("teachId", cls.getTeachId());
+		            map.put("price", cls.getPrice());
+		            map.put("mark", cls.getMark());
+		            map.put("state", cls.getState());
+		            map.put("img", cls.getImg());
+		            return map;
+		        }).collect(Collectors.toList());
+		        
+		    } catch (Exception e) {
+		        System.err.println("과목별 강의 조회 오류: " + e.getMessage());
+		        throw new RuntimeException("과목별 강의 조회 실패", e);
+		    }
+		}
 }

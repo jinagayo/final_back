@@ -6,6 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,6 +17,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +26,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.spark.Entity.UserEntity;
+import com.spark.controller.BoardController.ApiResponse;
+import com.spark.dto.BoardDTO;
+import com.spark.dto.ProfileUpdateDTO;
 import com.spark.dto.ProfileUpdateDTO;
 import com.spark.dto.SocialPaymentDTO;
 import com.spark.dto.StudentDTO;
@@ -28,6 +36,7 @@ import com.spark.dto.TeacherDTO;
 import com.spark.dto.UserDTO;
 import com.spark.Entity.StudentEntity;
 import com.spark.Entity.TeacherEntity;
+import com.spark.service.BoardService;
 import com.spark.service.CourseService;
 import com.spark.service.S3Service;
 import com.spark.service.UserService;
@@ -48,11 +57,15 @@ public class MyPageController {
 	private UserService userService;
 	@Autowired
 	private CourseService courseService;
-	
+
 	@Autowired
 	private S3Service s3Service;
 	
-    @GetMapping("Profile")
+	@Autowired
+	private BoardService boardService;
+	
+    
+	@GetMapping("Profile")
 	public ResponseEntity<UserEntity> profile(HttpSession session){
     	System.out.println("profile 컨트롤러 작동중");
     	String id = (String)session.getAttribute("login");
@@ -150,7 +163,6 @@ public class MyPageController {
         if (dto.getImg() != null) entity.setImg(dto.getImg());
         if (dto.getPosition() != null) entity.setPosition(dto.getPosition());
         if (dto.getState() != null) entity.setState(dto.getState());
-    	
     	UserEntity data = userService.UserUpdate(entity);
     	return ResponseEntity.ok(data);
     	
@@ -173,4 +185,25 @@ public class MyPageController {
     		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     	}
     }
+
+    /*
+    @GetMapping("subject/{subId}/classes")
+    public ResponseEntity<ApiResponse> getClassesBySubject(@PathVariable("subId") String subId) {
+        try {
+            List<Map<String, Object>> classes = courseService.getClassesBySubjectId(subId);
+            
+            Map<String, Object> responseData = new HashMap<>();
+            responseData.put("classes", classes);
+            responseData.put("subId", subId);
+            
+            return ResponseEntity.ok(new ApiResponse(true, "과목별 강의 조회 성성", responseData, 1));
+            
+        } catch (Exception e) {
+            System.err.println("과목별 강의 조회 오류: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            	    .body(new ApiResponse(false, "조회 실패: " + e.getMessage(), null, 0));
+        }
+    
+    }
+	*/
 }

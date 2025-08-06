@@ -1,5 +1,7 @@
 package com.spark.Entity;
 
+import java.util.Date;
+
 import com.spark.dto.BoardDTO;
 
 import jakarta.persistence.Column;
@@ -41,6 +43,21 @@ public class BoardEntity {
 	@Column(name = "hits")
 	private int hits;//조회수
 	
+	@Column(name = "created_at")
+	private Date createAt;
+	
+	@Column(name = "created_by")
+	private String createBy;
+	
+	@Column(name = "updated_at")
+	private Date updateAt;
+	
+	@Column(name = "updated_by")
+	private String updateBy;
+	
+	@Column(name = "is_active")
+	private int isActive;
+	
 	public BoardEntity(BoardDTO dto) {
 		this.boardId = dto.getBoard_id();
 		this.title = dto.getTitle();
@@ -50,5 +67,10 @@ public class BoardEntity {
 		this.file = dto.getFile();
 		this.classId = dto.getClass_id();
 		this.hits = dto.getHits();
+		this.createAt = dto.getCreated_at();
+		this.createBy = dto.getCreated_by();
+		this.updateAt = dto.getUpdated_at();
+		this.updateBy = dto.getUpdated_by();
+		this.isActive = dto.getIs_active();
 	}
 }
