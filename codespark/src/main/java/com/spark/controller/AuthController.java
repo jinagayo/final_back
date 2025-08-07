@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import com.amazonaws.Response;
 import com.spark.dto.UserDTO;
 import com.spark.service.AuthService;
 
@@ -409,6 +411,64 @@ public class AuthController {
             response.put("message", "사용자 정보 조회 중 오류가 발생했습니다.");
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+    /* 비밀번호 찾기
+	  1. 파라미터(id,email) 저장.
+	  2. db에서 id,email을 이용하여 사용자 확인
+	  3. 사용자 확인 
+	     성공 :메일로 인증번호 보냄
+	     실패: 정보에 맞는 사용자를 찾을 수 없습니다.  메세지 출력후
+	                     현재 페이지를 비번찾기로 페이지 이동. 
+	  4. 사용자가 메일로 보내진 인증번호 4자리를 입력
+	  		올바른 인증번호 : 새로운 비번 
+	  		틀린 인증번호 : 인증에 실패하였습니다.
+	 */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse> forgotPassword(
+    		@RequestParam("user_id") String userId,
+    		@RequestParam("email") String email)
+    {
+        ApiResponse res = authService.sendVerificationCode(userId, email);
+        return ResponseEntity.ok(res);
+    }
+    
+    @PostMapping("/send-temp-password")
+    public ResponseEntity<ApiResponse> sendTempPassword(
+    		@RequestParam("user_id") String userId,
+    		@RequestParam("email") String email,
+    		@RequestParam("verification_code") String verificationCode){
+    	ApiResponse res = authService.sendTempPassword(userId, email, verificationCode);
+    	
+    	return ResponseEntity.ok(res);
+    }
+
+
+    // 공통 응답
+    public static class ApiResponse {
+        private boolean success;
+        private String message;
+        // 생성자, getter, setter
+        
+        public ApiResponse(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+		public boolean isSuccess() {
+			return success;
+		}
+
+		public void setSuccess(boolean success) {
+			this.success = success;
+		}
+
+		public String getMessage() {
+			return message;
+		}
+
+		public void setMessage(String message) {
+			this.message = message;
+		}
     }
 
 }
