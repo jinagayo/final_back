@@ -8,15 +8,21 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class WebConfig {
+public class WebConfig implements WebMvcConfigurer {
 
     @Autowired
     private AuthInterceptor authInterceptor;
 
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/**")  // 모든 경로에 적용
-                .excludePathPatterns("/static/**", "/css/**", "/js/**", "/images/**"); // 정적 리소스 제외
+        .addPathPatterns("/**")
+        .excludePathPatterns(
+            "/",
+        	"/static/**", 
+            "/css/**", 
+            "/js/**", 
+            "/images/**"
+        );
     }
 
 	@Bean

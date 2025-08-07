@@ -29,14 +29,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/auth")
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true")
 public class AuthController {
-
-    private final JoinController joinController;
+	
+	
 	@Autowired
 	private AuthService authService;
 
-    AuthController(JoinController joinController) {
-        this.joinController = joinController;
-    }
 	
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO login,
