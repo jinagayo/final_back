@@ -1,10 +1,12 @@
 package com.spark.controller;
 
+import com.spark.Entity.UserEntity;
 import com.spark.controller.ClassController.ApiResponse;
 import com.spark.dto.ApiResponseComment;
 import com.spark.dto.BoardDTO;
 import com.spark.dto.CommentDTO;
 import com.spark.dto.CommentRequestDTO;
+import com.spark.dto.UserDTO;
 import com.spark.service.BoardService;
 import com.spark.service.CodingService;
 import com.spark.service.CommentService;
@@ -271,10 +273,11 @@ public class BoardController {
     public ResponseEntity<ApiResponseComment<CommentDTO>> createComment(
             @PathVariable("boardno") int boardno,
             @Valid @RequestBody CommentRequestDTO request,
-            HttpServletRequest httpRequest) {
+            HttpServletRequest httpRequest,
+            HttpSession session) {
         
         try {
-            // 세션에서 사용자 정보 추출 (실제 구현에 맞게 수정);
+        	
             String userId = getCurrentUserId(httpRequest);
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -292,8 +295,6 @@ public class BoardController {
                     .body(ApiResponseComment.error("댓글 작성 중 오류가 발생했습니다."));
         }
     }
-    
-    
     //댓글 수정
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<ApiResponseComment<CommentDTO>> updateComment(

@@ -55,23 +55,18 @@ import jakarta.servlet.http.HttpSession;
 @CrossOrigin(origins="http://localhost:3000", allowCredentials="true") // CORS 설정 추가
 public class TeacherController {
 	
-	private final ClassService classService;
-	
-	
+	@Autowired
+	private ClassService classService;
 	@Autowired
 	private S3Service s3Service;
     @Autowired
     private MeterialRepository meterialRepo;
-    @Autowired
-    private UserService userService;
-	@Autowired
-	public TeacherController(ClassService classService) {
-		this.classService = classService;
-	}
 	@Autowired
 	public MeterialSubService meterialSubService;
 	@Autowired
 	public MeterialService meterialService;
+	@Autowired
+	private UserService userService;
 	
 	
 	//강사의 강의 목록 조회 (페이지네이션 + 검색)

@@ -65,13 +65,20 @@ public class MyPageController {
 	
     
 	@GetMapping("Profile")
-	public ResponseEntity<UserEntity> profile(HttpSession session){
+	public ResponseEntity<?> profile(HttpSession session){
     	System.out.println("profile 컨트롤러 작동중");
     	String id = (String)session.getAttribute("login");
+        if (id == null) {
+            System.out.println("로그인 정보 없음 - 401 반환");
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "로그인이 필요합니다.");
+            //error.put("redirect", "/login"); // 로그인 페이지 경로 명시
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+        }
     	UserEntity data = userService.UserProfile(id);
     	System.out.println("data:" + data);
         return ResponseEntity.ok().body(data);
-	}    
+	}
     @GetMapping("Student")
 	public ResponseEntity<StudentEntity> student(HttpSession session){
     	System.out.println("student 컨트롤러 작동중");
