@@ -52,5 +52,7 @@ public interface UserRepository extends JpaRepository<UserEntity, String> {
     @Query("SELECT u FROM UserEntity u WHERE u.position = '0' AND " +
     	       "(u.userId LIKE %:search% OR u.name LIKE %:search% OR u.email LIKE %:search%)")
     	Page<UserEntity> findByPositionZeroWithSearch(@Param("search") String search, Pageable pageable);
+	
+    Optional<UserEntity> findByUserIdAndEmail(String userId, String email);
 
 }

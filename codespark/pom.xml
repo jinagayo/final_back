@@ -113,6 +113,11 @@
     <version>3.3.1</version> <!-- 또는 최신 버전 -->
 </dependency>
 
+	<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-mail</artifactId>
+	</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>

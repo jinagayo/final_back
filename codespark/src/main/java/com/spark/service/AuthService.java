@@ -1,11 +1,14 @@
 package com.spark.service;
 
+import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +19,10 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.stereotype.Service;
 
 import com.spark.Entity.UserEntity;
+import com.spark.controller.AuthController.ApiResponse;
 import com.spark.dto.UserDTO;
 import com.spark.repository.AuthRepository;
+import com.spark.repository.UserRepository;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,6 +37,15 @@ public class AuthService {
 	
 	@Autowired
 	private PasswordEncoder pwEncoder;
+	
+	@Autowired
+	private UserRepository userRepo;
+	
+	@Autowired
+	private  VerificationCodeService verificationCodeService;
+	
+	@Autowired
+	private JavaMailSender mailSender;
 	
 	@Autowired
 	private CustomUserDetailsService userDetailsService; // ✅ 소문자 시작
@@ -142,6 +156,62 @@ public class AuthService {
             response.put("message", "사용자 정보 조회 중 오류가 발생했습니다.");
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+	public ApiResponse sendVerificationCode(String userId, String email) {
+		  Optional<UserEntity> userOpt = userRepo.findByUserIdAndEmail(userId, email);
+	        if (userOpt.isEmpty()) {
+	            return new ApiResponse(false, "일치하는 사용자가 없습니다.");
+	        }
+	        // 6자리 랜덤 코드 생성
+	        String code = String.format("%06d", (int)(Math.random() * 1000000));
+	        verificationCodeService.saveCode(userId, code);
+
+	        // 메일 전송
+	        SimpleMailMessage message = new SimpleMailMessage();
+	        message.setTo(email);
+	        message.setSubject("[Codespark] 비밀번호 재설정 인증코드");
+	        message.setText("인증코드: " + code + "\n10분 이내에 입력해주세요.");
+	        mailSender.send(message);
+
+	        return new ApiResponse(true, "인증 코드가 이메일로 전송되었습니다.");
+	}
+
+	public ApiResponse sendTempPassword(String userId, String email, String verificationCode) {
+		Optional<UserEntity> userOpt = userRepo.findByUserIdAndEmail(userId, email);
+		if (userOpt.isEmpty()) {
+            return new ApiResponse(false, "일치하는 사용자가 없습니다.");
+        }
+        if (!verificationCodeService.verifyCode(userId, verificationCode)) {
+            return new ApiResponse(false, "인증코드가 올바르지 않습니다.");
+        }
+        
+        //임시비밀번호 생성
+        String tempPassword =  generateTempPassword(8);
+        UserEntity user = userOpt.get();
+        user.setPw(pwEncoder.encode(tempPassword));
+        userRepo.save(user);
+        verificationCodeService.removeCode(userId);
+        
+        //임시 비밀번호 메일 발송
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("[Codespark] 임시 비밀번호 안내");
+        message.setText("임시 비밀번호: " + tempPassword + "\n로그인 후 반드시 비밀번호를 변경해주세요.");
+        mailSender.send(message);
+        
+        return new ApiResponse(true, "임시 비밀번호가 이메일로 발송되었습니다.");
+	}
+
+    // 임시 비밀번호 생성 유틸
+    private String generateTempPassword(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 
 }
