@@ -1,4 +1,7 @@
 package com.spark.Entity;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.spark.dto.AttendanceDTO;
 
 import jakarta.persistence.Column;
@@ -13,6 +16,9 @@ import lombok.NoArgsConstructor;
 @Entity 
 @Table(name = "attendance")
 @Data
+
+@SQLDelete(sql = "UPDATE attendance SET is_active = false WHERE att_id = ?")
+@Where(clause = "is_active = true")
 @NoArgsConstructor
 public class AttendanceEntity {
     @Id
