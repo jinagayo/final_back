@@ -116,6 +116,7 @@ public class CourseService {
 	public void deleteClass(String classId) {
 		Integer id = Integer.parseInt(classId);
 		courseRepo.deleteById(id);
+		attendRepo.deleteByclassId(id);
 		
 	}
 	   public List<ClassInfoDTO> getMain() {
