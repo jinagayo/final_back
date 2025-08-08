@@ -308,17 +308,15 @@ public class ClassController {
     ) throws IOException {
         String userId = (String)session.getAttribute("login");
         
-
-        if (userId == null) {
-            System.out.println("로그인되지 않음 - 401 반환");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+        String assignmentUrl = null;
+        
+        // 파일이 있을 때만 업로드
+        if (file != null && !file.isEmpty()) {
+            String s3Key = s3Service.upload(file, "board");
+            assignmentUrl = "https://my-lecture-video.s3.ap-northeast-2.amazonaws.com/" + s3Key;
         }
 
-        //S3업로드
-        String s3Key = s3Service.upload(file, "board");
-        String assignmentUrl = "https://my-lecture-video.s3.ap-northeast-2.amazonaws.com/" + s3Key;
-        
+       
         BoardDTO board = new BoardDTO();
         board.setTitle(title);
         board.setContent(content);
