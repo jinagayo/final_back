@@ -327,4 +327,8 @@ public class BoardService {
         System.out.println("게시글 삭제 완료 - boardId: " + boardId + ", userId: " + userId);
     }
 
+	public BoardEntity findById(int boardId) {
+		 return boardRepository.findById(boardId).orElse(null);
+	}
+
 }

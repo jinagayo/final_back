@@ -59,4 +59,5 @@ public class CommentEntity {
 		this.updateBy = dto.getUpdated_by();
 		this.isActive = dto.getIs_active();
 	}
+
 }

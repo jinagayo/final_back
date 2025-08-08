@@ -1,5 +1,7 @@
 package com.spark.controller;
 
+import com.spark.Entity.BoardEntity;
+import com.spark.Entity.CommentEntity;
 import com.spark.Entity.UserEntity;
 import com.spark.controller.ClassController.ApiResponse;
 import com.spark.dto.ApiResponseComment;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +39,8 @@ import java.util.Map;
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class BoardController {
 
-    private final CodingService codingService;
+	@Autowired
+    private CodingService codingService;
     
     @Autowired
     private BoardService boardService;
@@ -46,12 +50,6 @@ public class BoardController {
     
     @Autowired
     private S3Service s3Service;
-
-
-    BoardController(CodingService codingService) {
-        this.codingService = codingService;
-    }
-    
     
     @GetMapping("/list")
     public ResponseEntity<ApiResponse> getBoardList(
@@ -165,9 +163,37 @@ public class BoardController {
     
     //게시글 수정
     @PutMapping("/edit/{boardId}")
-    public ResponseEntity<ApiResponse> updateBoard(@PathVariable int boardId, @RequestBody BoardDTO boardDTO) {
+    public ResponseEntity<ApiResponse> updateBoard(@PathVariable int boardId, @RequestBody BoardDTO boardDTO,HttpSession session) {
+    	
         try {
+        	String userId = (String) session.getAttribute("login");
+        	String position = (String) session.getAttribute("position");
+        	
+        	//로그인 확인
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+            }
+        	
+            //게시글 작성자 확인
+            BoardEntity board = boardService.findById(boardId);
+            if (board == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(false, "게시글을 찾을 수 없습니다.", null, 0));
+            }
+            
+            boolean isAuthor = userId.equals(board.getUserId()) || userId.equals(board.getCreateBy());
+            boolean isAdmin = "3".equals(position);
+            
+            if (!isAuthor && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse(false, "본인이 작성한 게시글만 수정할 수 있습니다.", null, 0));
+            }
+            
             boardDTO.setBoard_id(boardId);
+            boardDTO.setUser_id(board.getUserId());
+            boardDTO.setCreated_by(board.getCreateBy());
+            
             BoardDTO updatedBoard = boardService.updateBoard(boardDTO);
             return ResponseEntity.ok(new ApiResponse(true, "게시글 수정 성공", updatedBoard, 0));
         } catch (Exception e) {
@@ -177,8 +203,29 @@ public class BoardController {
     }
     
     @DeleteMapping("/{boardId}")
-    public ResponseEntity<ApiResponse> deleteBoard(@PathVariable int boardId) {
+    public ResponseEntity<ApiResponse> deleteBoard(@PathVariable int boardId,HttpSession session) {
         try {
+        	String userId = (String) session.getAttribute("login");
+        	String position = (String) session.getAttribute("position");
+        	
+        	if(userId == null) {
+        		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+        	}
+        	
+        	//게시글 작성자 확인
+            BoardEntity board = boardService.findById(boardId);
+            if (board == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(false, "게시글을 찾을 수 없습니다.", null, 0));
+            }
+            boolean isAuthor = userId.equals(board.getUserId()) || userId.equals(board.getCreateBy());
+            boolean isAdmin = "3".equals(position); // 관리자 권한
+            
+            if (!isAuthor && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse(false, "본인이 작성한 게시글만 삭제할 수 있습니다.", null, 0));
+            }
+            
             boardService.deleteBoard(boardId);
             return ResponseEntity.ok(new ApiResponse(true, "게시글 삭제 성공", null, 0));
         } catch (Exception e) {
@@ -186,6 +233,7 @@ public class BoardController {
                     .body(new ApiResponse(false, "게시글 삭제 실패: " + e.getMessage(), null, 0));
         }
     }
+    
     private Map<String, Object> convertToNoticeFormat(BoardDTO board) {
         Map<String, Object> notice = new HashMap<>();
         notice.put("id", board.getBoard_id());
@@ -331,27 +379,26 @@ public class BoardController {
     
     //댓글 삭제
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<ApiResponseComment<Void>> deleteComment(
-            @PathVariable("commentId") int commentId,
-            HttpServletRequest httpRequest) {
-        
+    public ResponseEntity<ApiResponse> deleteComment(@PathVariable int commentId, HttpSession session) {
         try {
-            String userId = getCurrentUserId(httpRequest);
+            String userId = (String) session.getAttribute("login");
+            String userRole = (String) session.getAttribute("position");
+            
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+                    .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
             }
             
-            commService.deleteComment(commentId, userId);
-            return ResponseEntity.ok(ApiResponseComment.success("댓글 삭제 성공", null));
+            // ⭐ Service에서 권한 체크까지 처리
+            commService.deleteComment(commentId, userId, userRole);
+            return ResponseEntity.ok(new ApiResponse(true, "댓글 삭제 성공", null, 0));
             
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponseComment.error(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse(false, e.getMessage(), null, 0));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(ApiResponseComment.error("댓글 삭제 중 오류가 발생했습니다."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "댓글 삭제 실패: " + e.getMessage(), null, 0));
         }
-    }
-    
+    }    
 }

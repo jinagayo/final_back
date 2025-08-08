@@ -22,6 +22,24 @@ public class CommentService {
 	@Autowired
 	private CommentRepository commRepo;
 	
+	// ⭐ 댓글 작성자 확인 메서드 추가
+	public CommentEntity findCommentById(int commentId) {
+		return commRepo.findById(commentId).orElse(null);
+	}
+	
+	
+	// ⭐ 댓글 작성자 ID 조회 메서드 추가  
+	public String getCommentAuthor(int commentId) {
+		CommentEntity comment = commRepo.findById(commentId).orElse(null);
+		return comment != null ? comment.getCreateBy() : null;
+	}
+		
+	// ⭐ 댓글 존재 여부 및 작성자 확인 메서드
+	public boolean isCommentAuthor(int commentId, String userId) {
+		CommentEntity comment = commRepo.findById(commentId).orElse(null);
+		return comment != null && userId.equals(comment.getCreateBy());
+	}
+	
 	//댓글 조회
     public List<CommentDTO> getCommentsByBoardno(int boardno) {
         List<CommentEntity> allComments = commRepo.findActiveCommentsByBoardno(boardno);
@@ -123,9 +141,18 @@ public class CommentService {
     }
     
     //댓글 삭제
-    public void deleteComment(int commentId, String userId) {
-        CommentEntity comment = commRepo.findActiveCommentByIdAndUser(commentId, userId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없거나 삭제 권한이 없습니다."));
+    public void deleteComment(int commentId, String userId, String userRole) {
+        // ⭐ 권한 체크 추가
+        CommentEntity comment = commRepo.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 찾을 수 없습니다."));
+        
+        // 본인 댓글이거나 관리자인 경우만 삭제 가능
+        boolean isAuthor = userId.equals(comment.getCreateBy());
+        boolean isAdmin = "3".equals(userRole);
+        
+        if (!isAuthor && !isAdmin) {
+            throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
+        }
         
         Date now = new Date();
         if (comment.getReno() == 0) {
@@ -136,11 +163,11 @@ public class CommentService {
                     "삭제된 댓글입니다.", 
                     now, 
                     userId, 
-                    userId
+                    comment.getCreateBy() // ⭐ 작성자는 그대로 유지
                 );
                 
                 if (updatedRows > 0) {
-                    System.out.println("댓글 내용 변경 완료 - commentId: {}"+commentId);
+                    System.out.println("댓글 내용 변경 완료 - commentId: " + commentId);
                 } else {
                     throw new IllegalArgumentException("댓글 삭제에 실패했습니다.");
                 }
@@ -148,10 +175,11 @@ public class CommentService {
             }
         }
         
-        int deletedRows = commRepo.deleteCommentLogically(commentId, now, userId, userId);
+        int deletedRows = commRepo.deleteCommentLogically(commentId, now, userId, comment.getCreateBy());
         
         if (deletedRows == 0) {
             throw new IllegalArgumentException("댓글 삭제에 실패했습니다.");
         }
     }
+
 }
