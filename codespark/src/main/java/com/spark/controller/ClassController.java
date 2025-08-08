@@ -34,6 +34,7 @@ import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.TestEntity;
 import com.spark.Entity.TestSubEntity;
+import com.spark.controller.BoardController.ApiResponse;
 import com.spark.dto.ApiResponseComment;
 import com.spark.dto.BoardDTO;
 import com.spark.dto.ClassDTO;
@@ -526,28 +527,28 @@ public class ClassController {
     
     //댓글 삭제
     @DeleteMapping("board/comments/{commentId}")
-    public ResponseEntity<ApiResponseComment<Void>> deleteComment(
-            @PathVariable("commentId") int commentId,
-            HttpServletRequest httpRequest) {
-        
+    public ResponseEntity<ApiResponse> deleteComment(@PathVariable int commentId, HttpSession session) {
         try {
-            String userId = getCurrentUserId(httpRequest);
+            String userId = (String) session.getAttribute("login");
+            String userRole = (String) session.getAttribute("position");
+            
             if (userId == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(ApiResponseComment.error("로그인이 필요합니다."));
+                    .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
             }
             
-            commService.deleteComment(commentId, userId);
-            return ResponseEntity.ok(ApiResponseComment.success("댓글 삭제 성공", null));
+            // ⭐ Service에서 권한 체크까지 처리
+            commService.deleteComment(commentId, userId, userRole);
+            return ResponseEntity.ok(new ApiResponse(true, "댓글 삭제 성공", null, 0));
             
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest()
-                    .body(ApiResponseComment.error(e.getMessage()));
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new ApiResponse(false, e.getMessage(), null, 0));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body(ApiResponseComment.error("댓글 삭제 중 오류가 발생했습니다."));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ApiResponse(false, "댓글 삭제 실패: " + e.getMessage(), null, 0));
         }
-    }
+    }  
 
     //Api
     class ApiResponse {
