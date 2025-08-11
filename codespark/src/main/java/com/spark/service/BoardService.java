@@ -310,13 +310,14 @@ public class BoardService {
         return entityToDto(savedEntity);
     }
     
-    private Map<String, Object> convertBoardToMap(BoardEntity board) {
+    private Map<String, Object> convertBoardToMap(BoardEntity board) {   	
     	Map<String, Object> map = new HashMap<>();
         map.put("id", board.getBoardId());
         map.put("title", board.getTitle());
         map.put("content", board.getContent());
-        map.put("author", board.getCreateBy());
-		map.put("createBy", board.getCreateBy());
+        String author = board.getCreateBy() != null ? board.getCreateBy() : board.getUserId();
+        map.put("author", author);
+		map.put("createBy", author);
 		map.put("createdAt", board.getCreateAt());
 		map.put("updatedAt", board.getUpdateAt());
 		map.put("viewCount", board.getHits());
