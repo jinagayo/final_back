@@ -30,6 +30,7 @@ import com.spark.service.CommentService;
 import com.spark.service.CourseService;
 import com.spark.service.MeterialSubService;
 import com.spark.service.S3Service;
+import com.spark.Entity.BoardEntity;
 import com.spark.Entity.MeterialEntity;
 import com.spark.Entity.MeterialSubEntity;
 import com.spark.Entity.TestEntity;
@@ -324,6 +325,7 @@ public class ClassController {
         board.setClass_id(class_id);
         board.setFile(assignmentUrl);
         board.setUser_id(userId);
+        board.setIs_active(1);
         
         try {
             BoardDTO createdBoard = boardService.createBoardClassId(class_id, board);
@@ -370,30 +372,61 @@ public class ClassController {
     //강의별 게시판 수정
     @GetMapping("board/edit/{classId}/{boardId}")
     public ResponseEntity<ApiResponse> getBoardForEdit(
-        @PathVariable String classId,
-        @PathVariable int boardId) {
-        
+        @PathVariable int boardId,
+        @RequestParam(required = false) String classId, // classId를 파라미터로 받음
+        HttpSession session) {
+
         try {
             System.out.println("=== 게시글 조회 (수정용) ===");
-            System.out.println("classId: " + classId);
             System.out.println("boardId: " + boardId);
+            System.out.println("classId: " + classId);
+
+            String userId = (String) session.getAttribute("login");
+            String position = (String) session.getAttribute("position");
+
+            // 로그인 확인
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+            }
+
+            // 게시글 조회 - Entity로 조회해서 권한 체크에 필요한 정보 확인
+            BoardEntity boardEntity = boardService.findById(boardId);
             
-            // 게시글 조회
-            BoardDTO board = boardService.getBoardByclassId(boardId);
-            
-            if (board == null) {
+            if (boardEntity == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse(false, "게시글을 찾을 수 없습니다.", null, 0));
             }
-            
-            // 게시글의 class_id가 요청한 classId와 일치하는지 확인
-            if (!classId.equals(board.getClass_id())) {
+
+            // classId가 제공된 경우 해당 강의의 게시글인지 확인
+            if (classId != null && !classId.equals(boardEntity.getClassId())) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(new ApiResponse(false, "해당 강의의 게시글이 아닙니다.", null, 0));
             }
+
+            // 권한 체크 - 본인 글이거나 관리자인지 확인
+            boolean isAuthor = userId.equals(boardEntity.getUserId()) || userId.equals(boardEntity.getCreateBy());
+            boolean isAdmin = "3".equals(position);
+
+            if (!isAuthor && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse(false, "본인이 작성한 게시글만 수정할 수 있습니다.", null, 0));
+            }
+
+            // DTO로 변환하면서 작성자 정보도 포함
+            BoardDTO board = boardService.getBoardByclassId(boardId);
             
+            // 🔥 작성자 정보 추가 - 프론트엔드 권한 체크를 위해
+            if (board != null) {
+                board.setUser_id(boardEntity.getUserId());
+                board.setCreated_by(boardEntity.getCreateBy());
+                board.setUser_id(boardEntity.getUserId());
+                board.setCreated_by(boardEntity.getCreateBy());
+                board.setIs_active(board.getIs_active());
+            }
+
             return ResponseEntity.ok(new ApiResponse(true, "게시글 조회 성공", board, 0));
-            
+
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiResponse(false, "게시글 조회 실패: " + e.getMessage(), null, 0));
@@ -402,22 +435,42 @@ public class ClassController {
     
     @PutMapping("board/edit/{classId}/{boardId}")
     public ResponseEntity<ApiResponse> updateBoard(
-        @PathVariable String classId, 
+        @RequestParam(required = false) String classId, // classId를 파라미터로 받음
         @PathVariable int boardId, 
-        @RequestBody BoardDTO boardDTO) {
-        
+        @RequestBody BoardDTO boardDTO,
+        HttpSession session) {
+
         try {
-            System.out.println("=== 수정 컨트롤러 호출됨 ===");
-            System.out.println("받은 classId: " + classId);
-            System.out.println("받은 boardId: " + boardId);
-            System.out.println("받은 DTO: " + boardDTO.toString());
-            
+            String userId = (String) session.getAttribute("login");
+            String position = (String) session.getAttribute("position");
+
+            // 로그인 확인
+            if (userId == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse(false, "로그인이 필요합니다.", null, 0));
+            }
+
+            // 게시글 작성자 확인
+            BoardEntity board = boardService.findById(boardId);
+            if (board == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(false, "게시글을 찾을 수 없습니다.", null, 0));
+            }
+
+            boolean isAuthor = userId.equals(board.getUserId()) || userId.equals(board.getCreateBy());
+            boolean isAdmin = "3".equals(position);
+
+            if (!isAuthor && !isAdmin) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new ApiResponse(false, "본인이 작성한 게시글만 수정할 수 있습니다.", null, 0));
+            }
+
             boardDTO.setBoard_id(boardId);
-            boardDTO.setClass_id(classId); // classId도 설정
-            System.out.println("컨트롤러 class_id = " + boardDTO.getClass_id());
-            
-            
-            BoardDTO updatedBoard = boardService.updateBoardByClassId(boardDTO);
+            boardDTO.setUser_id(board.getUserId());
+            boardDTO.setCreated_by(board.getCreateBy());
+            boardDTO.setIs_active(board.getIsActive());
+
+            BoardDTO updatedBoard = boardService.updateBoard(boardDTO);
             return ResponseEntity.ok(new ApiResponse(true, "게시글 수정 성공", updatedBoard, 0));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -262,9 +262,12 @@ public class BoardService {
             .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다. ID: " + boardDTO.getBoard_id()));
 
         // 2. 디버깅 출력 (기존 값 확인)
+        System.out.println("=== 수정 전 값 확인 ===");
         System.out.println("수정 전 classId: " + existingEntity.getClassId());
+        System.out.println("수정 전 is_active: " + existingEntity.getIsActive()); // 🔥 추가
+        System.out.println("DTO에서 받은 is_active: " + boardDTO.getIs_active()); // 🔥 추가
 
-        // 3. 수정할 필드만 변경 (null 체크 필요 시 if문 추가 가능)
+        // 3. 수정할 필드만 변경
         existingEntity.setTitle(boardDTO.getTitle());
         existingEntity.setContent(boardDTO.getContent());
         existingEntity.setFile(boardDTO.getFile());
@@ -275,24 +278,46 @@ public class BoardService {
         if (boardDTO.getClass_id() != null) {
             existingEntity.setClassId(boardDTO.getClass_id());
         }
+        
+        // 🔥 5. is_active 값 유지 - 이 부분이 핵심!
+        if (boardDTO.getIs_active() != -1) { // -1은 "설정 안됨"을 의미
+            existingEntity.setIsActive(boardDTO.getIs_active());
+            System.out.println("is_active 값을 DTO에서 설정: " + boardDTO.getIs_active());
+        } else {
+            System.out.println("is_active 값을 기존 값으로 유지: " + existingEntity.getIsActive());
+        }
 
-        // 5. 저장
+        // 🔥 6. 다른 중요한 필드들도 유지
+        if (boardDTO.getUser_id() != null) {
+            existingEntity.setUserId(boardDTO.getUser_id());
+        }
+        if (boardDTO.getCreated_by() != null) {
+            existingEntity.setCreateBy(boardDTO.getCreated_by());
+        }
+        if (boardDTO.getBoardnum() != null) {
+            existingEntity.setBoardnum(boardDTO.getBoardnum());
+        }
+
+        // 7. 저장
         BoardEntity savedEntity = boardRepository.save(existingEntity);
 
-        // 6. 디버깅 출력 (변경 후 확인)
+        // 8. 디버깅 출력 (변경 후 확인)
+        System.out.println("=== 수정 후 값 확인 ===");
         System.out.println("수정 후 classId: " + savedEntity.getClassId());
+        System.out.println("수정 후 is_active: " + savedEntity.getIsActive()); // 🔥 추가
 
-        // 7. DTO 변환 후 반환
+        // 9. DTO 변환 후 반환
         return entityToDto(savedEntity);
     }
     
-    private Map<String, Object> convertBoardToMap(BoardEntity board) {
+    private Map<String, Object> convertBoardToMap(BoardEntity board) {   	
     	Map<String, Object> map = new HashMap<>();
         map.put("id", board.getBoardId());
         map.put("title", board.getTitle());
         map.put("content", board.getContent());
-        map.put("author", board.getCreateBy());
-		map.put("createBy", board.getCreateBy());
+        String author = board.getCreateBy() != null ? board.getCreateBy() : board.getUserId();
+        map.put("author", author);
+		map.put("createBy", author);
 		map.put("createdAt", board.getCreateAt());
 		map.put("updatedAt", board.getUpdateAt());
 		map.put("viewCount", board.getHits());
