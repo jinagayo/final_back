@@ -30,6 +30,10 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+	<dependency>
+	    <groupId>org.springframework.boot</groupId>
+	    <artifactId>spring-boot-starter-mail</artifactId>
+	</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -81,11 +85,13 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!--
 		<dependency>
 		    <groupId>mysql</groupId>
 		    <artifactId>mysql-connector-java</artifactId>
 		    <version>8.0.33</version>
 		</dependency>
+		-->
 			 <!-- AWS SDK for Java v2 -->
     <dependency>
         <groupId>software.amazon.awssdk</groupId>
@@ -107,17 +113,11 @@
     </dependency>
     
     <!-- FFmpeg은 Java에서 외부 프로세스로 실행합니다 -->
-<dependency>
-    <groupId>ws.schild</groupId>
-    <artifactId>jave-core</artifactId>
-    <version>3.3.1</version> <!-- 또는 최신 버전 -->
-</dependency>
-
 	<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-mail</artifactId>
+	    <groupId>ws.schild</groupId>
+	    <artifactId>jave-core</artifactId>
+	    <version>3.3.1</version> <!-- 또는 최신 버전 -->
 	</dependency>
-
 	</dependencies>
 	<build>
 		<plugins>

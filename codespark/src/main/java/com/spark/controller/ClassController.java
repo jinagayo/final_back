@@ -323,6 +323,7 @@ public class ClassController {
         board.setContent(content);
         board.setBoardnum(boardnum);
         board.setClass_id(class_id);
+        System.out.println("class_id" + class_id);
         board.setFile(assignmentUrl);
         board.setUser_id(userId);
         board.setIs_active(1);
