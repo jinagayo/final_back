@@ -70,11 +70,12 @@ final project
 ### :camera: 데모 스크린샷
 > 아래는 실제 시스템 UI의 예시입니다.
 
-- 메인화면
-![메인](https://hackmd.io/_uploads/S1575OFKeg.png)
+  - 메인화면
+  <img width="601" height="315" alt="Image" src="https://github.com/user-attachments/assets/285456c0-a1e4-4131-a358-e8c41765ee65" />
+  
+  - 강의 상세
+  <img width="651" height="319" alt="Image" src="https://github.com/user-attachments/assets/6df5420e-59cd-4485-a1dd-0cf55e95ed7f" />
+  
+  - 강의 수강
+  <img width="658" height="338" alt="강의수강" src="https://github.com/user-attachments/assets/96a503a7-5472-4803-81b4-f848983f1dcc" />
 
-- 강의 상세
-![강의리스트](https://hackmd.io/_uploads/H1fLqOFKel.png)
-
-- 강의 수강
- ![강의수강](https://hackmd.io/_uploads/BJfO9OFKxx.png)
